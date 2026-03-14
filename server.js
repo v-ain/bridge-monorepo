@@ -52,7 +52,12 @@ const routes = {
   'GET /status': (req, res) => {
     res.writeHead(200);
     res.end('System OK');
-  }
+  },
+    // Заглушка для иконки — возвращаем 204 (No Content)
+  'GET /favicon.ico': (req, res) => {
+    res.writeHead(204);
+    res.end();
+  },
 };
 
 // 4. ЯДРО СЕРВЕРА
