@@ -1,6 +1,7 @@
 const http = require('http');
 const crypto = require('crypto');
 
+const DEBUG = process.env.DEBUG === 'true';
 // 1. ПРЕДУСТАНОВКИ БЕЗОПАСНОСТИ
 // Хеш пароля (в реале бери из БД или .env). Соль обязательна!
 const EXPECTED_HASH = crypto.scryptSync('твой_секрет_2026', 'static_salt', 64);
@@ -58,17 +59,26 @@ const routes = {
 const server = http.createServer((req, res) => {
   setSecurityHeaders(res);
 
+  if (DEBUG) {
+  // Выводим ВСЕ заголовки, чтобы поймать хитреца
+  console.log('--- DEBUG INFO ---');
+  console.log(`URL: ${req.url}`);
+  console.log(`Заголовки:`, req.headers);
+  }
   // ФИЛЬТР: Спекулятивные пре-запросы браузера (Prefetch)
-  if (req.headers['sec-purpose'] === 'prefetch') {
+  const purpose = req.headers['sec-purpose'] || '';
+  // Универсальный перехват спекуляций (Spectre-style браузера)
+  if (purpose.includes('prefetch') || purpose.includes('prerender')) {
     res.writeHead(204);
     return res.end();
   }
+
+  console.log(`[${new Date().toLocaleTimeString()}] Вход: ${req.method} ${req.url}`);
 
   const routeKey = `${req.method} ${req.url}`;
   const handler = routes[routeKey];
 
   if (handler) {
-    console.log(`[${new Date().toLocaleTimeString()}] ${routeKey}`);
     handler(req, res);
   } else {
     res.writeHead(404);
