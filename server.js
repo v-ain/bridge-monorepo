@@ -1,5 +1,7 @@
 const http = require('http');
 const crypto = require('crypto');
+const fs = require('fs/promises');
+const path = require('path');
 
 const DEBUG = process.env.DEBUG === 'true';
 // 1. ПРЕДУСТАНОВКИ БЕЗОПАСНОСТИ
@@ -15,6 +17,65 @@ const setSecurityHeaders = (res) => {
 };
 
 // 2. ОБРАБОТЧИКИ (Handlers)
+const NOTES_PATH = path.join(__dirname, 'data', 'notes.json');
+const MAX_SIZE = 1 * 1024 * 1024; // 1 Мегабайт
+
+const handleSaveNote = async (req, res) => {
+  let bodyChunks = [];
+  let currentSize = 0;
+
+  req.on('data', chunk => {
+    currentSize += chunk.length;
+    // ЖЕСТКАЯ ПРОВЕРКА: Если данных слишком много — обрываем соединение
+    if (currentSize > MAX_SIZE) {
+      console.error('!!! Попытка переполнения памяти (DoS) !!!');
+      res.statusCode = 413;; // Payload Too Large
+      res.end('Payload Too Large');
+      return req.destroy(); // Обрываем сокет физически
+    }
+    bodyChunks.push(chunk);
+  });
+
+  req.on('end', async () => {
+    const rawBody = Buffer.concat(bodyChunks);
+    
+    try {
+      // Превращаем буфер в строку только в момент парсинга
+      const noteContent = rawBody.toString('utf-8');
+      const newNote = {
+        id: Date.now(),
+        content: noteContent,
+        device: req.headers['user-agent'] || 'unknown',
+        timestamp: new Date().toISOString()
+      };
+
+      // Читаем текущую базу (если файла нет - создаем пустой массив)
+      let notes = [];
+      try {
+        const data = await fs.readFile(NOTES_PATH, 'utf-8');
+        notes = JSON.parse(data);
+      } catch (e) { /* Файл еще не создан */ }
+
+      notes.push(newNote);
+
+      // Записываем обновленный список
+      await fs.writeFile(NOTES_PATH, JSON.stringify(notes, null, 2), 'utf-8');
+
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ message: 'Saved successfully', id: newNote.id }));
+
+    } catch (err) {
+      res.writeHead(400);
+      res.end('Ошибка формата данных');
+    } finally {
+      // ФИНАЛЬНЫЙ ШТРИХ: Стираем сырые данные из памяти (Spectre-safe!)
+      rawBody.fill(0);
+      console.log(`[${new Date().toLocaleTimeString()}] Заметка сохранена (${currentSize} байт)`);
+    }
+  });
+};
+
+
 const handleAuth = (req, res) => {
   let bodyChunks = [];
   req.on('data', chunk => bodyChunks.push(chunk));
@@ -58,6 +119,8 @@ const routes = {
     res.writeHead(204);
     res.end();
   },
+  
+  'POST /notes': handleSaveNote
 };
 
 // 4. ЯДРО СЕРВЕРА
