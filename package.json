@@ -1,0 +1,14 @@
+{
+  "name": "bridge-monorepo",
+  "version": "1.0.0",
+  "description": "Monorepo with shared types, JS server, and React client",
+  "private": true,
+  "workspaces": [],
+  "scripts": {
+    "start": "cd server && node server.js",
+    "dev": "cd server && node --watch server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
