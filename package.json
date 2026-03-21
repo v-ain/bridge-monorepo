@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Monorepo with shared types, JS server, and React client",
   "private": true,
-  "workspaces": [],
+  "workspaces": [
+    "shared"
+  ],
   "scripts": {
     "start": "cd server && node server.js",
     "dev": "cd server && node --watch server.js"

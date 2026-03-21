@@ -1,0 +1,7 @@
+{
+  "name": "@bridge-monorepo/shared",
+  "version": "1.0.0",
+  "description": "Shared types and interfaces",
+  "main": "index.ts",
+  "types": "index.ts"
+}
