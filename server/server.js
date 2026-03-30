@@ -1,7 +1,23 @@
-const http = require('http');
-const crypto = require('crypto');
-const fs = require('fs/promises');
-const path = require('path');
+import http from 'http';
+import crypto from 'crypto';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// ESM-совместимый __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ПРОВЕРКА SHARED ТИПОВ
+/** @type {import('@bridge-monorepo/shared').User} */
+const testUser = {
+  id: "1",
+  name: 'Test',
+  email: 'test@example.com',
+  role: 'superadmin'
+};
+console.log('✅ Shared types loaded!');
+console.log('Test user:', testUser);
 
 const DEBUG = process.env.DEBUG === 'true';
 // 1. ПРЕДУСТАНОВКИ БЕЗОПАСНОСТИ
