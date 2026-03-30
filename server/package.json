@@ -8,7 +8,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "check-types": "tsc --project jsconfig.json",
-    "start:prod": "NODE_ENV=production node server.js"
+    "start:prod": "NODE_ENV=production node server.js",
+    "test": "bash test.sh"
   },
   "dependencies": {
     "@bridge-monorepo/shared": "*"
