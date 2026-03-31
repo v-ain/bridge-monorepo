@@ -2,5 +2,33 @@
   "name": "@bridge-monorepo/client",
   "version": "1.0.0",
   "private": true,
-  "description": "React client app"
+  "description": "React client app",
+  "type": "module",
+  "scripts": {
+    "dev": "webpack serve --mode development",
+    "build": "cross-env NODE_ENV=production webpack",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "babel-loader": "^10.1.1",
+    "cross-env": "^10.1.0",
+    "css-loader": "^7.1.4",
+    "html-webpack-plugin": "^5.6.6",
+    "mini-css-extract-plugin": "^2.10.2",
+    "sass": "^1.98.0",
+    "sass-loader": "^16.0.7",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.105.4",
+    "webpack-cli": "^7.0.2",
+    "webpack-dev-server": "^5.2.3"
+  },
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  }
 }
