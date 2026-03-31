@@ -53,6 +53,8 @@ export default {
                 localIdentName: isProduction
                   ? '[hash:base64:5]'
                   : '[name]__[local]__[hash:base64:5]',
+                    exportOnlyLocals: false,
+                    namedExport: false,
               },
             },
           },
