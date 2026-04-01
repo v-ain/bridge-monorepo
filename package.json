@@ -5,7 +5,8 @@
   "private": true,
   "workspaces": [
     "shared",
-    "server"
+    "server",
+    "client"
   ],
   "scripts": {
     "start": "npm run start --workspace server",
