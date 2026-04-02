@@ -24,6 +24,11 @@ const DEBUG = process.env.DEBUG === 'true';
 // Хеш пароля (в реале бери из БД или .env). Соль обязательна!
 const EXPECTED_HASH = crypto.scryptSync('твой_секрет_2026', 'static_salt', 64);
 
+const setCorsHeaders = (res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+};
 // Хелпер для "бронирования" ответа
 const setSecurityHeaders = (res) => {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
@@ -54,7 +59,7 @@ const handleSaveNote = async (req, res) => {
 
   req.on('end', async () => {
     const rawBody = Buffer.concat(bodyChunks);
-    
+
     try {
       // Превращаем буфер в строку только в момент парсинга
       const noteContent = rawBody.toString('utf-8');
@@ -98,7 +103,7 @@ const handleAuth = (req, res) => {
   req.on('end', () => {
     // Собираем в Buffer (не в строку!), чтобы не мусорить в Heap
     const rawBody = Buffer.concat(bodyChunks);
-    
+
     try {
       const inputHash = crypto.scryptSync(rawBody, 'static_salt', 64);
       // Сравнение за фиксированное время (защита от Timing Attack)
@@ -135,13 +140,12 @@ const routes = {
     res.writeHead(204);
     res.end();
   },
-  
+
   'POST /notes': handleSaveNote
 };
 
 // 4. ЯДРО СЕРВЕРА
 const server = http.createServer((req, res) => {
-  setSecurityHeaders(res);
 
   if (DEBUG) {
   // Выводим ВСЕ заголовки, чтобы поймать хитреца
@@ -149,13 +153,25 @@ const server = http.createServer((req, res) => {
   console.log(`URL: ${req.url}`);
   console.log(`Заголовки:`, req.headers);
   }
-  // ФИЛЬТР: Спекулятивные пре-запросы браузера (Prefetch)
+
+  // FILTER: SPECTRE PREFETCH
   const purpose = req.headers['sec-purpose'] || '';
   // Универсальный перехват спекуляций (Spectre-style браузера)
   if (purpose.includes('prefetch') || purpose.includes('prerender')) {
     res.writeHead(204);
     return res.end();
   }
+
+  // 2. CORS (добавить эту секцию)
+  setCorsHeaders(res);
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  // SECURITY HEADERS
+  setSecurityHeaders(res);
 
   console.log(`[${new Date().toLocaleTimeString()}] Вход: ${req.method} ${req.url}`);
 
@@ -173,4 +189,3 @@ const server = http.createServer((req, res) => {
 server.listen(3000, '0.0.0.0', () => {
   console.log('\x1b[32m%s\x1b[0m', '🛡️  Spectre-Safe Server started on port 3000');
 });
-
