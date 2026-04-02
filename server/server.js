@@ -3,7 +3,8 @@ import crypto from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
+import { setCorsHeaders, handlePreflight } from './cors.js';
+import { setSecurityHeaders, handlePrefetch } from './security.js';
 // ESM-совместимый __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,30 +21,17 @@ console.log('✅ Shared types loaded!');
 console.log('Test user:', testUser);
 
 const DEBUG = process.env.DEBUG === 'true';
-// 1. ПРЕДУСТАНОВКИ БЕЗОПАСНОСТИ
+const NOTES_PATH = path.join(__dirname, 'data', 'notes.json');
+
 // Хеш пароля (в реале бери из БД или .env). Соль обязательна!
 const EXPECTED_HASH = crypto.scryptSync('твой_секрет_2026', 'static_salt', 64);
 
-const setCorsHeaders = (res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-};
-// Хелпер для "бронирования" ответа
-const setSecurityHeaders = (res) => {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  // Чистая Нода и так не шлет X-Powered-By, но мы на страже
-};
-
 // 2. ОБРАБОТЧИКИ (Handlers)
-const NOTES_PATH = path.join(__dirname, 'data', 'notes.json');
-const MAX_SIZE = 1 * 1024 * 1024; // 1 Мегабайт
 
 const handleSaveNote = async (req, res) => {
   let bodyChunks = [];
   let currentSize = 0;
+  const MAX_SIZE = 1 * 1024 * 1024; // 1 Мегабайт
 
   req.on('data', chunk => {
     currentSize += chunk.length;
@@ -144,31 +132,21 @@ const routes = {
   'POST /notes': handleSaveNote
 };
 
-// 4. ЯДРО СЕРВЕРА
+// ========== SERVER ==========
 const server = http.createServer((req, res) => {
 
   if (DEBUG) {
-  // Выводим ВСЕ заголовки, чтобы поймать хитреца
   console.log('--- DEBUG INFO ---');
   console.log(`URL: ${req.url}`);
   console.log(`Заголовки:`, req.headers);
   }
 
   // FILTER: SPECTRE PREFETCH
-  const purpose = req.headers['sec-purpose'] || '';
-  // Универсальный перехват спекуляций (Spectre-style браузера)
-  if (purpose.includes('prefetch') || purpose.includes('prerender')) {
-    res.writeHead(204);
-    return res.end();
-  }
+  if (handlePrefetch(req, res)) return;
 
-  // 2. CORS (добавить эту секцию)
+  // 2. CORS HEADERS + PREFLIGHT
   setCorsHeaders(res);
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204);
-    res.end();
-    return;
-  }
+  if (handlePreflight(req, res)) return;
 
   // SECURITY HEADERS
   setSecurityHeaders(res);
