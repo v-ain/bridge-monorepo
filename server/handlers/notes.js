@@ -21,6 +21,35 @@ export const handleGetNotes = async (req, res) => {
   }
 };
 
+// GET /notes/:id — получить одну заметку
+export const handleGetNoteById = async (req, res, id) => {
+  const noteId = parseInt(id, 10);
+  if (isNaN(noteId)) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Invalid note ID' }));
+    return;
+  }
+
+  try {
+    const data = await fs.readFile(NOTES_PATH, 'utf-8');
+    const notes = JSON.parse(data);
+    const note = notes.find(n => n.id === noteId);
+
+    if (!note) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Note not found' }));
+      return;
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(note));
+  } catch (e) {
+    console.error('Get note by ID error:', e);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Server error' }));
+  }
+};
+
 // POST /notes
 export const handleSaveNote = async (req, res) => {
   let bodyChunks = [];
