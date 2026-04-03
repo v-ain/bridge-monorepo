@@ -109,8 +109,34 @@ export const handleSaveNote = async (req, res) => {
   });
 };
 
-// DELETE /notes/:id (заготовка)
+// DELETE /notes/:id
 export const handleDeleteNote = async (req, res, id) => {
-  res.writeHead(501);
-  res.end(JSON.stringify({ error: 'Not implemented yet' }));
+  // Преобразуем id в число (из строки, полученной из regex)
+  const noteId = parseInt(id, 10);
+
+  if (isNaN(noteId)) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Invalid note ID' }));
+    return;
+  }
+
+  try {
+    const data = await fs.readFile(NOTES_PATH, 'utf-8');
+    let notes = JSON.parse(data);
+    const filtered = notes.filter(note => note.id !== noteId);
+
+    if (notes.length === filtered.length) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Note not found' }));
+      return;
+    }
+
+    await fs.writeFile(NOTES_PATH, JSON.stringify(filtered, null, 2));
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: 'Deleted successfully', id: noteId }));
+  } catch (e) {
+    console.error('Delete error:', e);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Server error' }));
+  }
 };
