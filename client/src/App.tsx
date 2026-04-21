@@ -1,3 +1,4 @@
+import { Layout } from './components/Layout/Layout';
 import { UserCard } from './components/UserCard';
 import { User } from '@shared/index';
 
@@ -15,7 +16,7 @@ function App() {
   };
 
   return (
-    <div className="container">
+    <Layout>
       <h1>Bridge Monorepo</h1>
       <p>Клиент работает, shared типы подключены! ✅</p>
 
@@ -26,7 +27,8 @@ function App() {
           🔍 Проверка: <code>User</code> тип из <code>@shared/index</code> работает
         </small>
       </div>
-    </div>
+    </Layout>
+
   );
 }
 
