@@ -1,6 +1,9 @@
+import './styles/global.scss';
+
 import { Layout } from './components/Layout/Layout';
 import { UserCard } from './components/UserCard';
 import { User } from '@shared/index';
+
 
 // Демо-пользователь (тип из shared)
 const demoUser: User = {
