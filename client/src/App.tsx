@@ -3,6 +3,8 @@ import './styles/global.scss';
 import { Layout } from './components/Layout/Layout';
 import { UserCard } from './components/UserCard';
 import { User } from '@shared/index';
+import { Button, Card, Input } from './components/ui';
+import { useState } from 'react';
 
 
 // Демо-пользователь (тип из shared)
@@ -14,6 +16,7 @@ const demoUser: User = {
 };
 
 function App() {
+  const [text, setText] = useState('');
   const handleGreet = (user: User) => {
     alert(`Привет, ${user.name}! Твоя роль: ${user.role}`);
   };
@@ -30,6 +33,27 @@ function App() {
           🔍 Проверка: <code>User</code> тип из <code>@shared/index</code> работает
         </small>
       </div>
+      <div className='pt-2'>
+        <h1>UI Kit Demo</h1>
+        <p>Testing Button, Input, and Card components</p>
+
+        <Card hover>
+          <h3>Card Component</h3>
+          <p>This card has hover effect</p>
+          <Input
+            value={text}
+            onChange={setText}
+            placeholder="Type something..."
+            label="Test Input"
+          />
+          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+            <Button variant="primary">Primary</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="danger">Danger</Button>
+          </div>
+        </Card>
+      </div>
+
     </Layout>
 
   );
