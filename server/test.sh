@@ -6,7 +6,7 @@ RED='\033[0;31m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-BASE_URL="http://localhost:3000"
+BASE_URL="http://192.168.0.101:3000"
 NOTES_URL="$BASE_URL/notes"
 
 echo "=== Server API Tests ==="

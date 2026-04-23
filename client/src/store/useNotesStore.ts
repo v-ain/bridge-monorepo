@@ -13,7 +13,8 @@ interface NotesStore {
   deleteNote: (id: number) => Promise<void>;
 }
 
-const API_URL = 'http://127.0.0.1:3000';
+//const API_URL = 'http://127.0.0.1:3000';
+const API_URL = 'http://192.168.0.101:3000';
 
 export const useNotesStore = create<NotesStore>((set, get) => ({
   notes: [],
