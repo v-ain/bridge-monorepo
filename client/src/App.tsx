@@ -1,32 +1,20 @@
-import { UserCard } from './components/UserCard';
-import { User } from '@shared/index';
+import './styles/global.scss';
 
-// Демо-пользователь (тип из shared)
-const demoUser: User = {
-  id: 1,
-  name: 'AdminName',
-  email: 'admin@bridge.local',
-  role: 'admin',
-};
+import { Layout } from './components/Layout/Layout';
+import { NoteForm, NoteList } from './components/notes';
 
 function App() {
-  const handleGreet = (user: User) => {
-    alert(`Привет, ${user.name}! Твоя роль: ${user.role}`);
-  };
-
   return (
-    <div className="container">
-      <h1>Bridge Monorepo</h1>
-      <p>Клиент работает, shared типы подключены! ✅</p>
-
-      <UserCard user={demoUser} onGreet={handleGreet} />
-
-      <div style={{ marginTop: '32px', padding: '16px', background: '#e2e8f0', borderRadius: '8px' }}>
-        <small>
-          🔍 Проверка: <code>User</code> тип из <code>@shared/index</code> работает
-        </small>
+    <Layout>
+      <div>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-xl)' }}>
+          <h1>Bridge Notes Monorepo</h1>
+          <p style={{ color: 'var(--gray-500)' }}>Your personal notes — stored on the server</p>
+        </div>
+        <NoteForm />
+        <NoteList />
       </div>
-    </div>
+    </Layout>
   );
 }
 
