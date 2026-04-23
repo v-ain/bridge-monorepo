@@ -1,0 +1,32 @@
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+}
+
+.content {
+  flex: 1;
+}
+
+.text {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.meta {
+  display: flex;
+  gap: var(--spacing-md);
+  font-size: var(--text-sm);
+  color: var(--gray-500);
+}
+
+.date, .device {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
