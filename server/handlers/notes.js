@@ -124,8 +124,23 @@ export const handleSaveNote = async (req, res) => {
       // Записываем обновленный список
       await fs.writeFile(NOTES_PATH, JSON.stringify(notes, null, 2), 'utf-8');
 
+      const MAX_PREVIEW_LENGTH = 100;
+      let previewContent = newNote.content;
+
+      if (previewContent.length > MAX_PREVIEW_LENGTH) {
+        const chunk = previewContent.slice(0, MAX_PREVIEW_LENGTH);
+        const match = chunk.match(/(.+)\s/s);
+        previewContent = match ? match[1].trimEnd() + '...' : chunk + '...';
+      }
+
+      const responseNote = {
+        id: newNote.id,
+        content: previewContent,
+        timestamp: newNote.timestamp
+      };
+
       res.writeHead(201, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: 'Saved successfully', id: newNote.id }));
+      res.end(JSON.stringify(responseNote));
 
     } catch (err) {
       res.writeHead(400);
