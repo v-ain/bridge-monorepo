@@ -6,8 +6,12 @@ export interface User {
 }
 
 export interface Note {
-  id: number;
-  title: string;
+  id: string;
   content: string;
-  createdAt: Date;
+  timestamp: string;
+  device?: string;
 }
+
+export type CreateNoteDto = Pick<Note, 'content'>;
+
+export type NoteResponse = Omit<Note, 'device'>;

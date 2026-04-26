@@ -1,16 +1,17 @@
-import { Note } from '@shared/index';
 import { create } from 'zustand';
+import { CreateNoteDto, NoteResponse } from '@shared/index';
 
 
 interface NotesStore {
-  notes: Note[];
+  notes: NoteResponse[];
   loading: boolean;
   error: string | null;
 
   // Actions
   fetchNotes: () => Promise<void>;
   addNote: (content: string) => Promise<void>;
-  deleteNote: (id: number) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
+  updateNote: (id: string, content: string) => Promise<void>;
 }
 
 //const API_URL = 'http://127.0.0.1:3000';
@@ -26,29 +27,23 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
     try {
       const response = await fetch(`${API_URL}/notes`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const notes = await response.json();
+      const notes: NoteResponse[] = await response.json();
       set({ notes, loading: false });
     } catch (error) {
       set({ error: (error as Error).message, loading: false });
     }
   },
 
-  addNote: async (content: string) => {
+  addNote: async (content) => {
     set({ loading: true, error: null });
     try {
       const response = await fetch(`${API_URL}/notes`, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: content,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content } as CreateNoteDto),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const result = await response.json();
-
-      const newNote: Note = {
-        id: result.id,
-        content,
-        timestamp: new Date().toISOString(),
-      };
+      const newNote: NoteResponse = await response.json();
 
       set((state) => ({
         notes: [newNote, ...state.notes],
@@ -59,7 +54,25 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
     }
   },
 
-  deleteNote: async (id: number) => {
+  updateNote: async (id, content) => {
+    try {
+      const response = await fetch(`/api/notes/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+      if (!response.ok) throw new Error('Ошибка при обновлении');
+      const updatedNote: NoteResponse = await response.json();
+
+      set((state) => ({
+        notes: state.notes.map((n) => (n.id === id ? updatedNote : n)),
+      }));
+    } catch (e: any) {
+      set({ error: e.message });
+    }
+  },
+
+  deleteNote: async (id) => {
     set({ loading: true, error: null });
     try {
       const response = await fetch(`${API_URL}/notes/${id}`, {

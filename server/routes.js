@@ -1,4 +1,4 @@
-import { handleGetNotes, handleGetNoteById, handleSaveNote, handleDeleteNote } from './handlers/notes.js';
+import { handleGetNotes, handleGetNoteById, handleSaveNote, handleDeleteNote, handleUpdateNote } from './handlers/notes.js';
 import { handleAuth } from './handlers/auth.js';
 
 // ========== СТАТИЧЕСКИЕ МАРШРУТЫ ==========
@@ -24,7 +24,8 @@ const routes = {
 // ========== ДИНАМИЧЕСКИЕ МАРШРУТЫ (пока пустые) ==========
 export const dynamicRoutes = [
   { method: 'GET', pattern: /^\/notes\/(.+)$/, handler: handleGetNoteById },
-  { method: 'DELETE', pattern: /^\/notes\/(.+)$/, handler: handleDeleteNote }
+  { method: 'DELETE', pattern: /^\/notes\/(.+)$/, handler: handleDeleteNote },
+  { method: 'PATCH', pattern: /^\/notes\/([a-zA-Z0-9-]+)$/, handler: handleUpdateNote }
 ];
 
 // ========== ПОИСК МАРШРУТА ==========
