@@ -9,6 +9,7 @@ interface NotesStore {
 
   // Actions
   fetchNotes: () => Promise<void>;
+  fetchFullNote: (id: string) => Promise<NoteResponse>;
   addNote: (content: string) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   updateNote: (id: string, content: string) => Promise<void>;
@@ -34,6 +35,18 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
     }
   },
 
+  fetchFullNote: async (id: string) => {
+    try {
+      const response = await fetch(`${API_URL}/notes/${id}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const note = await response.json();
+      return note;
+    } catch (error) {
+      console.error('Failed to fetch full note:', error);
+      throw error;
+    }
+  },
+
   addNote: async (content) => {
     set({ loading: true, error: null });
     try {
@@ -56,7 +69,7 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
 
   updateNote: async (id, content) => {
     try {
-      const response = await fetch(`/api/notes/${id}`, {
+      const response = await fetch(`${API_URL}/notes/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content }),
