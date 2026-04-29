@@ -5,10 +5,9 @@ import styles from './NoteDetail.module.scss';
 
 interface NoteDetailProps {
   noteId: string;
-  onClose: () => void;
 }
 
-export const NoteDetail = ({ noteId, onClose }: NoteDetailProps) => {
+export const NoteDetail = ({ noteId }: NoteDetailProps) => {
   const { notes } = useNotesStore();
   const note = notes.find(n => n.id === noteId);
 
@@ -16,16 +15,14 @@ export const NoteDetail = ({ noteId, onClose }: NoteDetailProps) => {
     return (
       <Card>
         <p>Note not found</p>
-        <Button onClick={onClose}>Close</Button>
       </Card>
     );
   }
 
   return (
-    <Card className={styles.detail}>
+    <Card className={''}>
       <div className={styles.header}>
         <h3>Note Details</h3>
-        <button className={styles.closeBtn} onClick={onClose}>✕</button>
       </div>
       <div className={styles.content}>
         <p>{note.content}</p>

@@ -7,9 +7,10 @@ import styles from './NoteItem.module.scss';
 
 interface NoteItemProps {
   note: Note;
+  onModal: (id: string) => void;
 }
 
-export const NoteItem = ({ note }: NoteItemProps) => {
+export const NoteItem = ({ note, onModal }: NoteItemProps) => {
   const { deleteNote, updateNote, fetchFullNote, loading } = useNotesStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(note.content);
@@ -77,7 +78,9 @@ export const NoteItem = ({ note }: NoteItemProps) => {
 
   return (
     <Card hover className={styles.item}>
-      <div className={styles.content}>
+      <div className={styles.content} onClick={() => {
+        onModal(note.id)
+      }}>
         <p className={styles.text}>{note.content}</p>
         <div className={styles.meta}>
           <span className={styles.date}>📅 {formattedDate}</span>
