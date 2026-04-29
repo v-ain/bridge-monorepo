@@ -14,6 +14,7 @@ function App() {
         <NoteForm />
         <NoteList />
       </div>
+      <div id='modal-root' />
     </Layout>
   );
 }
