@@ -12,6 +12,13 @@ export interface Note {
   device?: string;
 }
 
+export interface INote extends Note {
+  preview: string;
+  hasMore: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type CreateNoteDto = Pick<Note, 'content'>;
 
 export type NoteResponse = Omit<Note, 'device'>;

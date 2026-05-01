@@ -30,3 +30,37 @@
   align-items: center;
   gap: var(--spacing-xs);
 }
+
+// ... существующие стили
+
+.actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.editingCard {
+  padding: var(--spacing-lg);
+}
+
+.editTextarea {
+  width: 100%;
+  padding: var(--spacing-sm);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  resize: vertical;
+  margin-bottom: var(--spacing-md);
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
