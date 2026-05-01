@@ -15,13 +15,48 @@ const MAX_SIZE = 1 * 1024 * 1024;
 /** @typedef {import('@bridge-monorepo/shared').CreateNoteDto} UpdateNoteDto */
 /** @typedef {import('@bridge-monorepo/shared').INote} INote */
 
+async function readJsonFileSync() {
+
+  const data = await fs.readFile(NOTES_PATH, 'utf-8');
+  var notesCache = JSON.parse(data);
+
+  return notesCache;
+}
+
+function cacheNotesRead() {
+  var cache = {
+    dataCacheJSObject: { data: undefined },
+    async update() { cache.dataCacheJSObject.data = undefined }
+  };
+
+  async function readData() {
+
+    if (cache.dataCacheJSObject.data == undefined) {
+      console.log('Reading from file ' + NOTES_PATH);
+      cache.dataCacheJSObject.data = await readJsonFileSync();
+    }
+
+    return cache.dataCacheJSObject.data
+  }
+
+  async function update() {
+    cache.update();
+  }
+  return [readData, update];
+}
+
+
+let [cacheNotes, update] = cacheNotesRead();
+
 // GET /notes
 export const handleGetNotes = async (req, res) => {
   try {
-    const data = await fs.readFile(NOTES_PATH, 'utf-8');
 
     /** @type {INote[]} */
-    const notes = JSON.parse(data);
+    let notes = [];
+
+    const data = await cacheNotes();
+    notes = data;
     const MAX_PREVIEW_LENGTH = 100;
     const previewNotes = notes.map(note => {
       let content = note.content;
@@ -159,6 +194,7 @@ export const handleSaveNote = async (req, res) => {
         timestamp: newNote.timestamp
       };
 
+      update();
       res.writeHead(201, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(responseNote));
 
@@ -196,7 +232,7 @@ export const handleDeleteNote = async (req, res, id) => {
     }
 
     await fs.writeFile(NOTES_PATH, JSON.stringify(filtered, null, 2));
-
+    update();
     res.writeHead(200, { 'Content-Type': 'application/json' });
     // Возвращаем id удаленной заметки (полезно для фронтенда, чтобы убрать из стейта)
     res.end(JSON.stringify({ message: 'Deleted successfully', id: id }));
@@ -278,6 +314,7 @@ export const handleUpdateNote = async (req, res, id) => {
     };
 
 
+    update();
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(newNote));
 
