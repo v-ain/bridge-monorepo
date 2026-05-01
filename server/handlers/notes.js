@@ -13,20 +13,18 @@ const MAX_SIZE = 1 * 1024 * 1024;
 /** @typedef {import('@bridge-monorepo/shared').NoteResponse} NoteResponse */
 /** @typedef {import('@bridge-monorepo/shared').Note} Note */
 /** @typedef {import('@bridge-monorepo/shared').CreateNoteDto} UpdateNoteDto */
+/** @typedef {import('@bridge-monorepo/shared').INote} INote */
 
 // GET /notes
 export const handleGetNotes = async (req, res) => {
   try {
     const data = await fs.readFile(NOTES_PATH, 'utf-8');
 
-    /** @type {Note[]} */
+    /** @type {INote[]} */
     const notes = JSON.parse(data);
     const MAX_PREVIEW_LENGTH = 100;
-
-    /** @type {NoteResponse[]} */
     const previewNotes = notes.map(note => {
       let content = note.content;
-
       if (content.length > MAX_PREVIEW_LENGTH) {
         // Режем до лимита и ищем последний пробел
         const chunk = content.slice(0, MAX_PREVIEW_LENGTH);
@@ -38,7 +36,20 @@ export const handleGetNotes = async (req, res) => {
 
       const { device, ...rest } = note;
       // Если длина меньше лимита, условие не выполнится и вернется оригинал
-      return { ...rest, content };
+      // return { ...rest, content };
+
+      /** @type {INote} */
+      const noteDto = {
+        preview: content,
+        content,
+        id: note.id,
+        hasMore: note.content.length > MAX_PREVIEW_LENGTH,
+        createdAt: note.timestamp,
+        updatedAt: note.timestamp,
+        timestamp: note.timestamp,
+      }
+
+      return noteDto
     });
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(previewNotes));
@@ -104,12 +115,16 @@ export const handleSaveNote = async (req, res) => {
       /** @type {CreateNoteDto} */
       const noteContent = JSON.parse(rawBody.toString('utf-8'));
 
-      /** @type {Note} */
+      /** @type {INote} */
       const newNote = {
         id: randomUUID(),
         content: noteContent.content,
         timestamp: new Date().toISOString(),
         device: req.headers['user-agent'] || 'unknown',
+        // preview: noteContent.content,
+        // hasMore: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       // Читаем текущую базу (если файла нет - создаем пустой массив)
@@ -133,9 +148,14 @@ export const handleSaveNote = async (req, res) => {
         previewContent = match ? match[1].trimEnd() + '...' : chunk + '...';
       }
 
+      /** @type {INote} */
       const responseNote = {
         id: newNote.id,
         content: previewContent,
+        preview: previewContent,
+        hasMore: newNote.content.length > MAX_PREVIEW_LENGTH,
+        createdAt: newNote.timestamp,
+        updatedAt: newNote.timestamp,
         timestamp: newNote.timestamp
       };
 
@@ -230,7 +250,9 @@ export const handleUpdateNote = async (req, res, id) => {
     const updatedNote = {
       ...notes[index],           // копируем всё старое (id, device и т.д.)
       content: parsedBody.content, // обновляем текст
-      timestamp: new Date().toISOString() // обновляем время правки
+      timestamp: new Date().toISOString(), // обновляем время правки
+      createdAt: notes[index].timestamp ? notes[index].timestamp : new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     notes[index] = updatedNote;
@@ -238,8 +260,26 @@ export const handleUpdateNote = async (req, res, id) => {
     // 5. Записываем обратно в файл
     await fs.writeFile(NOTES_PATH, JSON.stringify(notes, null, 2));
 
+    const note = updatedNote;
+
+    // let isShortNote = note.content;
+
+
+    /** @type {INote} */
+    const newNote = {
+      id: note.id,
+      content: note.content,
+      timestamp: note.timestamp,
+      // device: req.headers['user-agent'] || 'unknown',
+      preview: note.content,
+      hasMore: false,
+      createdAt: note.timestamp,
+      updatedAt: note.timestamp,
+    };
+
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(updatedNote));
+    res.end(JSON.stringify(newNote));
 
   } catch (e) {
     console.error('Update error:', e);
