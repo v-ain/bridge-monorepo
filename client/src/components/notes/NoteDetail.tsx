@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNotesStore } from '../../store/useNotesStore';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
@@ -8,10 +9,13 @@ interface NoteDetailProps {
 }
 
 export const NoteDetail = ({ noteId }: NoteDetailProps) => {
-  const { notes } = useNotesStore();
+  const { notes, fetchFullNote } = useNotesStore();
   const note = notes.find(n => n.id === noteId);
 
-  if (!note) {
+  useEffect(() => {
+    fetchFullNote(noteId)
+  },[])
+if (!note) {
     return (
       <Card>
         <p>Note not found</p>
