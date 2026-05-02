@@ -9,7 +9,6 @@ import Modal from '../modal/Modal';
 
 export const NoteList = () => {
   const { notes, loading, error, fetchNotes } = useNotesStore();
-
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
 
   const closeSelectModalWindow = () => { setSelectedNote(null) }

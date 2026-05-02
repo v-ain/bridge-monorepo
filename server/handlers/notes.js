@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { randomUUID } from 'node:crypto';
+import { createPreviewNote } from './max_preview_length.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -9,10 +10,7 @@ const __dirname = path.dirname(__filename);
 const NOTES_PATH = path.join(__dirname, '..', 'data', 'notes.json');
 const MAX_SIZE = 1 * 1024 * 1024;
 
-/** @typedef {import('@bridge-monorepo/shared').CreateNoteDto} CreateNoteDto */
-/** @typedef {import('@bridge-monorepo/shared').NoteResponse} NoteResponse */
 /** @typedef {import('@bridge-monorepo/shared').Note} Note */
-/** @typedef {import('@bridge-monorepo/shared').CreateNoteDto} UpdateNoteDto */
 /** @typedef {import('@bridge-monorepo/shared').INote} INote */
 
 async function readJsonFileSync() {
@@ -69,10 +67,6 @@ export const handleGetNotes = async (req, res) => {
         content = match ? match[1].trimEnd() + '...' : chunk + '...';
       }
 
-      const { device, ...rest } = note;
-      // Если длина меньше лимита, условие не выполнится и вернется оригинал
-      // return { ...rest, content };
-
       /** @type {INote} */
       const noteDto = {
         preview: content,
@@ -106,7 +100,7 @@ export const handleGetNoteById = async (req, res, id) => {
   try {
     const data = await fs.readFile(NOTES_PATH, 'utf-8');
 
-    /** @type {Note[]} */
+    /** @type {INote[]} */
     const notes = JSON.parse(data);
     const note = notes.find(note => note.id === id);
 
@@ -117,7 +111,7 @@ export const handleGetNoteById = async (req, res, id) => {
     }
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(note));
+    res.end(JSON.stringify(createPreviewNote(note)));
   } catch (e) {
     console.error('Get note by ID error:', e);
     res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -150,14 +144,11 @@ export const handleSaveNote = async (req, res) => {
       /** @type {CreateNoteDto} */
       const noteContent = JSON.parse(rawBody.toString('utf-8'));
 
-      /** @type {INote} */
+      /** @type {Note} */
       const newNote = {
         id: randomUUID(),
         content: noteContent.content,
         timestamp: new Date().toISOString(),
-        device: req.headers['user-agent'] || 'unknown',
-        // preview: noteContent.content,
-        // hasMore: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -186,9 +177,9 @@ export const handleSaveNote = async (req, res) => {
       /** @type {INote} */
       const responseNote = {
         id: newNote.id,
-        content: previewContent,
+        content: newNote.content,
         preview: previewContent,
-        hasMore: newNote.content.length > MAX_PREVIEW_LENGTH,
+        hasMore: false,
         createdAt: newNote.timestamp,
         updatedAt: newNote.timestamp,
         timestamp: newNote.timestamp
@@ -296,6 +287,15 @@ export const handleUpdateNote = async (req, res, id) => {
     // 5. Записываем обратно в файл
     await fs.writeFile(NOTES_PATH, JSON.stringify(notes, null, 2));
 
+
+    const MAX_PREVIEW_LENGTH = 100;
+    let previewContent = updatedNote.content;
+
+    if (previewContent.length > MAX_PREVIEW_LENGTH) {
+      const chunk = previewContent.slice(0, MAX_PREVIEW_LENGTH);
+      const match = chunk.match(/(.+)\s/s);
+      previewContent = match ? match[1].trimEnd() + '...' : chunk + '...';
+    }
     const note = updatedNote;
 
     // let isShortNote = note.content;
@@ -306,8 +306,7 @@ export const handleUpdateNote = async (req, res, id) => {
       id: note.id,
       content: note.content,
       timestamp: note.timestamp,
-      // device: req.headers['user-agent'] || 'unknown',
-      preview: note.content,
+      preview: previewContent,
       hasMore: false,
       createdAt: note.timestamp,
       updatedAt: note.timestamp,

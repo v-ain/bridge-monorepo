@@ -1,32 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNotesStore } from '../../store/useNotesStore';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { Note } from '@shared/index';
+import { INote, Note } from '@shared/index';
 import styles from './NoteItem.module.scss';
 
 interface NoteItemProps {
-  note: Note;
+  note: INote;
   onModal: (id: string) => void;
 }
 
 export const NoteItem = ({ note, onModal }: NoteItemProps) => {
   const { deleteNote, updateNote, fetchFullNote, loading } = useNotesStore();
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(note.content);
-  const [fullNote, setFullNote] = useState<Note | null>(null);
+  const [editContent, setEditContent] = useState('');
+  const [fullNote, setFullNote] = useState<boolean>(false);
   const [loadingFull, setLoadingFull] = useState(false);
+
+if(isEditing && fullNote && editContent === ''){setEditContent(note.content)}
 
   const handleEditClick = async () => {
     setLoadingFull(true);
     setIsEditing(true);
     try {
-      const full = await fetchFullNote(note.id);
-      setFullNote(full);
-      setEditContent(full.content);
+      let full = await fetchFullNote(note.id);
+      setFullNote(true);
+      //setEditContent(note.content);
     } catch (error) {
       console.error('Failed to load full note:', error);
-      setEditContent(note.content);
+      setEditContent('Failed to load full note:');
     } finally {
       setLoadingFull(false);
     }
@@ -36,12 +38,10 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
     if (!editContent.trim()) return;
     await updateNote(note.id, editContent);
     setIsEditing(false);
-    setFullNote(null);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    setFullNote(null);
   };
 
   const handleDelete = async () => {
@@ -49,7 +49,6 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
       await deleteNote(note.id);
     }
   };
-
 
   const formattedDate = new Date(note.timestamp).toLocaleString();
 
@@ -81,7 +80,7 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
       <div className={styles.content} onClick={() => {
         onModal(note.id)
       }}>
-        <p className={styles.text}>{note.content}</p>
+        <p className={styles.text}>{note.preview}</p>
         <div className={styles.meta}>
           <span className={styles.date}>📅 {formattedDate}</span>
           {note.device && <span className={styles.device}>📱 {note.device}</span>}
