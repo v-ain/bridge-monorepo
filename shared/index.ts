@@ -8,17 +8,16 @@ export interface User {
 export interface Note {
   id: string;
   content: string;
-  timestamp: string;
-  device?: string;
+  createdAt: string;
+  updatedAt: string;
+  timestamp?: string;
 }
 
 export interface INote extends Note {
   preview: string;
   hasMore: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
-export type CreateNoteDto = Pick<Note, 'content'>;
+export type NoteConentType = Pick<Note, 'content'>;
 
-export type NoteResponse = Omit<Note, 'device'>;
+export type NoteResponseDTO = Omit<Note, 'id'>;

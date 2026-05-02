@@ -1,15 +1,15 @@
 import { create } from 'zustand';
-import { CreateNoteDto, NoteResponse } from '@shared/index';
+import { INote } from '@shared/index';
 
 
 interface NotesStore {
-  notes: NoteResponse[];
+  notes: INote[];
   loading: boolean;
   error: string | null;
 
   // Actions
   fetchNotes: () => Promise<void>;
-  fetchFullNote: (id: string) => Promise<NoteResponse>;
+  fetchFullNote: (id: string) => Promise<void>;
   addNote: (content: string) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   updateNote: (id: string, content: string) => Promise<void>;
@@ -28,7 +28,7 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
     try {
       const response = await fetch(`${API_URL}/notes`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const notes: NoteResponse[] = await response.json();
+      const notes: INote[] = await response.json();
       set({ notes, loading: false });
     } catch (error) {
       set({ error: (error as Error).message, loading: false });
@@ -36,11 +36,25 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   },
 
   fetchFullNote: async (id: string) => {
+    set({ loading: true, error: null });
+ //   console.log('fetchFullNote')
     try {
       const response = await fetch(`${API_URL}/notes/${id}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const note = await response.json();
-      return note;
+      const note: INote = await response.json();
+
+      set((state) => ({
+        notes: state.notes.map((n) => {
+          if (n.id === note.id) {
+            return ({
+              ...n,
+              ...note,
+            })
+          }
+          return n;
+        }),
+        loading: false,
+      }));
     } catch (error) {
       console.error('Failed to fetch full note:', error);
       throw error;
@@ -53,10 +67,10 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
       const response = await fetch(`${API_URL}/notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content } as CreateNoteDto),
+        body: JSON.stringify({ content }),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const newNote: NoteResponse = await response.json();
+      const newNote: INote = await response.json();
 
       set((state) => ({
         notes: [newNote, ...state.notes],
