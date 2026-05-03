@@ -14,8 +14,8 @@ export const NoteDetail = ({ noteId }: NoteDetailProps) => {
 
   useEffect(() => {
     fetchFullNote(noteId)
-  },[])
-if (!note) {
+  }, [])
+  if (!note) {
     return (
       <Card>
         <p>Note not found</p>
