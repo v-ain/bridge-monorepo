@@ -1,11 +1,7 @@
-.detail {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 500px;
-  width: 90%;
-  z-index: 1000;
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .header {
@@ -17,19 +13,9 @@
   border-bottom: 1px solid var(--gray-200);
 }
 
-.closeBtn {
-  background: none;
-  border: none;
-  font-size: var(--text-xl);
-  cursor: pointer;
-  color: var(--gray-500);
-
-  &:hover {
-    color: var(--gray-800);
-  }
-}
-
 .content {
+  overflow-y: auto;
+  white-space: pre-wrap;
   p {
     margin-bottom: var(--spacing-md);
     line-height: 1.6;
