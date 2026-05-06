@@ -17,7 +17,7 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
   const [fullNote, setFullNote] = useState<boolean>(false);
   const [loadingFull, setLoadingFull] = useState(false);
 
-if(isEditing && fullNote && editContent === ''){setEditContent(note.content)}
+  if (isEditing && fullNote && editContent === '') { setEditContent(note.content) }
 
   const handleEditClick = async () => {
     setLoadingFull(true);
@@ -50,7 +50,7 @@ if(isEditing && fullNote && editContent === ''){setEditContent(note.content)}
     }
   };
 
-  const formattedDate = new Date(note.timestamp).toLocaleString();
+  const formattedDate = new Date(note.createdAt).toLocaleString();
 
   if (isEditing) {
     return (
