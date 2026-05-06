@@ -10,7 +10,6 @@ export interface Note {
   content: string;
   createdAt: string;
   updatedAt: string;
-  timestamp?: string;
 }
 
 export interface INote extends Note {
