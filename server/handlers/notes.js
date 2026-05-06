@@ -73,9 +73,8 @@ export const handleGetNotes = async (req, res) => {
         content,
         id: note.id,
         hasMore: note.content.length > MAX_PREVIEW_LENGTH,
-        createdAt: note.timestamp,
-        updatedAt: note.timestamp,
-        timestamp: note.timestamp,
+        createdAt: note.createdAt,
+        updatedAt: note.updatedAt,
       }
 
       return noteDto
@@ -147,7 +146,6 @@ export const handleSaveNote = async (req, res) => {
       const newNote = {
         id: randomUUID(),
         content: noteContent.content,
-        timestamp: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -179,9 +177,8 @@ export const handleSaveNote = async (req, res) => {
         content: newNote.content,
         preview: previewContent,
         hasMore: false,
-        createdAt: newNote.timestamp,
-        updatedAt: newNote.timestamp,
-        timestamp: newNote.timestamp
+        createdAt: newNote.createdAt,
+        updatedAt: newNote.updatedAt,
       };
 
       update();
@@ -275,8 +272,6 @@ export const handleUpdateNote = async (req, res, id) => {
     const updatedNote = {
       ...notes[index],           // копируем всё старое (id, device и т.д.)
       content: parsedBody.content, // обновляем текст
-      timestamp: new Date().toISOString(), // обновляем время правки
-      createdAt: notes[index].timestamp ? notes[index].timestamp : new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
@@ -303,11 +298,10 @@ export const handleUpdateNote = async (req, res, id) => {
     const newNote = {
       id: note.id,
       content: note.content,
-      timestamp: note.timestamp,
       preview: previewContent,
       hasMore: false,
-      createdAt: note.timestamp,
-      updatedAt: note.timestamp,
+      createdAt: note.createdAt,
+      updatedAt: note.updatedAt,
     };
 
 

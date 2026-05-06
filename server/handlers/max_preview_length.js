@@ -1,8 +1,10 @@
 /** @typedef {import('@bridge-monorepo/shared').INote} INote */
 
-
-export const createPreviewNote  = (note) => {
-const MAX_PREVIEW_LENGTH = 100;
+/**
+ * @param {INote} note
+ */
+export const createPreviewNote = (note) => {
+  const MAX_PREVIEW_LENGTH = 100;
   let content = note.content;
   if (content.length > MAX_PREVIEW_LENGTH) {
     // Режем до лимита и ищем последний пробел
@@ -19,9 +21,8 @@ const MAX_PREVIEW_LENGTH = 100;
     content: note.content,
     id: note.id,
     hasMore: false,
-    createdAt: note.timestamp,
-    updatedAt: note.timestamp,
-    timestamp: note.timestamp,
+    createdAt: note.createdAt,
+    updatedAt: note.updatedAt,
   }
 
   return noteDto;
