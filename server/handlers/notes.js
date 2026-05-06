@@ -141,7 +141,6 @@ export const handleSaveNote = async (req, res) => {
 
     try {
       // Превращаем буфер в строку только в момент парсинга
-      /** @type {CreateNoteDto} */
       const noteContent = JSON.parse(rawBody.toString('utf-8'));
 
       /** @type {Note} */
@@ -250,7 +249,6 @@ export const handleUpdateNote = async (req, res, id) => {
       body += chunk;
     }
 
-    /** @type {UpdateNoteDto} */
     const parsedBody = JSON.parse(body);
 
     if (!parsedBody.content) {
