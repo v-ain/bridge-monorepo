@@ -35,9 +35,10 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
     }
   },
 
+
   fetchFullNote: async (id: string) => {
     set({ loading: true, error: null });
- //   console.log('fetchFullNote')
+
     try {
       const response = await fetch(`${API_URL}/notes/${id}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -89,7 +90,7 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
         body: JSON.stringify({ content }),
       });
       if (!response.ok) throw new Error('Ошибка при обновлении');
-      const updatedNote: NoteResponse = await response.json();
+      const updatedNote: INote = await response.json();
 
       set((state) => ({
         notes: state.notes.map((n) => (n.id === id ? updatedNote : n)),
