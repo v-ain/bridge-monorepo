@@ -14,9 +14,9 @@ const DEBUG = process.env.DEBUG === 'true';
 const server = http.createServer(async (req, res) => {
 
   if (DEBUG) {
-  console.log('--- DEBUG INFO ---');
-  console.log(`URL: ${req.url}`);
-  console.log(`Заголовки:`, req.headers);
+    console.log('--- DEBUG INFO ---');
+    console.log(`URL: ${req.url}`);
+    console.log(`Заголовки:`, req.headers);
   }
 
   // FILTER: SPECTRE PREFETCH
@@ -52,5 +52,5 @@ const server = http.createServer(async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(3000, '0.0.0.0', () => {
-  console.log('\x1b[32m%s\x1b[0m', '🛡️  Spectre-Safe Server started on port ${PORT}');
+  console.log('\x1b[32m%s\x1b[0m', `🛡️  Spectre-Safe Server started on port ${PORT}`);
 });
