@@ -5,10 +5,10 @@ import { ErrorMessage } from '../ErrorMessage';
 import styles from './NoteList.module.scss';
 import { NoteDetail } from './NoteDetail';
 import Modal from '../modal/Modal';
-import { useNoteStoreV2 } from '@/store/useNoteStoreV2';
+import { useNoteStore } from '@/store/useNoteStore';
 
 export const NoteList = () => {
-  const { notes, isLoading, error, fetchNotes } = useNoteStoreV2();
+  const { notes, isLoading, error, fetchNotes } = useNoteStore();
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
 
   const closeSelectModalWindow = () => { setSelectedNote(null) }

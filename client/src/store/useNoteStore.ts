@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { notesApi } from '../api/apiClient';
 import { NoteEntity } from '@bridge-monorepo/shared';
 
-interface NoteStateV2 {
+interface NoteState {
   notes: NoteEntity[];
   isLoading: boolean;
   error: string | null;
@@ -13,7 +13,7 @@ interface NoteStateV2 {
   deleteNote: (id: string) => Promise<void>;
 }
 
-export const useNoteStoreV2 = create<NoteStateV2>((set) => ({
+export const useNoteStore = create<NoteState>((set) => ({
   notes: [],
   isLoading: false,
   error: null,

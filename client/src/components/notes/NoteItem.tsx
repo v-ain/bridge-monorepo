@@ -3,7 +3,7 @@ import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { NoteEntity } from '@shared/index';
 import styles from './NoteItem.module.scss';
-import { useNoteStoreV2 } from '@/store/useNoteStoreV2';
+import { useNoteStore } from '@/store/useNoteStore';
 
 interface NoteItemProps {
   note: NoteEntity;
@@ -11,8 +11,8 @@ interface NoteItemProps {
 }
 
 export const NoteItem = ({ note, onModal }: NoteItemProps) => {
-  const updateNote = useNoteStoreV2((state) => state.updateNote);
-  const deleteNote = useNoteStoreV2((state) => state.deleteNote);
+  const updateNote = useNoteStore((state) => state.updateNote);
+  const deleteNote = useNoteStore((state) => state.deleteNote);
 
   const [isEditing, setIsEditing] = useState(false);
 

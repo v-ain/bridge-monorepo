@@ -1,13 +1,12 @@
-import { useEffect } from 'react';
 import styles from './NoteDetail.module.scss';
-import { useNoteStoreV2 } from '@/store/useNoteStoreV2';
+import { useNoteStore } from '@/store/useNoteStore';
 
 interface NoteDetailProps {
   noteId: string;
 }
 
 export const NoteDetail = ({ noteId }: NoteDetailProps) => {
-  const note = useNoteStoreV2((state) => state.notes.find((n) => n.id === noteId));
+  const note = useNoteStore((state) => state.notes.find((n) => n.id === noteId));
 
   if (!note) {
     return (

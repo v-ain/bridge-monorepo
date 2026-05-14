@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import styles from './NoteForm.module.scss';
-import { useNoteStoreV2 } from '@/store/useNoteStoreV2';
+import { useNoteStore } from '@/store/useNoteStore';
 
 export const NoteForm = () => {
-  const addNote = useNoteStoreV2((state) => state.addNote);
-  const isLoading = useNoteStoreV2((state) => state.isLoading);
+  const addNote = useNoteStore((state) => state.addNote);
+  const isLoading = useNoteStore((state) => state.isLoading);
   const [text, setText] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
