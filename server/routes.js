@@ -1,4 +1,3 @@
-import { handleGetNotes, handleGetNoteById, handleSaveNote, handleDeleteNote, handleUpdateNote } from './handlers/notes.js';
 import { handleAuth } from './handlers/auth.js';
 import { NoteController } from './src/controllers/NoteControllers.js';
 import { NoteService } from './src/services/NoteService.js';
@@ -23,17 +22,12 @@ const routes = {
   },
 
   'POST /auth': handleAuth,
-  'POST /notes': handleSaveNote,
-  'GET /notes': handleGetNotes,
   'POST /api/notes': noteController.handleCreateNote,
   'GET /api/notes': noteController.handleGetAll,
 };
 
 // ========== ДИНАМИЧЕСКИЕ МАРШРУТЫ (пока пустые) ==========
 export const dynamicRoutes = [
-  { method: 'GET', pattern: /^\/notes\/(.+)$/, handler: handleGetNoteById },
-  { method: 'DELETE', pattern: /^\/notes\/(.+)$/, handler: handleDeleteNote },
-  { method: 'PATCH', pattern: /^\/notes\/([a-zA-Z0-9-]+)$/, handler: handleUpdateNote },
   { method: 'GET', pattern: /^\/api\/notes\/(.+)$/, handler: noteController.handleGetNoteById },
   { method: 'DELETE', pattern: /^\/api\/notes\/(.+)$/, handler: noteController.handleRemoveNote },
   { method: 'PATCH', pattern: /^\/api\/notes\/([a-zA-Z0-9-]+)$/, handler: noteController.handleUpdateNote }
