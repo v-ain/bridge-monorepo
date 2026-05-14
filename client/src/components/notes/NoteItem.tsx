@@ -1,46 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { useNotesStore } from '../../store/useNotesStore';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { INote, Note } from '@shared/index';
+import { NoteEntity } from '@shared/index';
 import styles from './NoteItem.module.scss';
+import { useNoteStoreV2 } from '@/store/useNoteStoreV2';
 
 interface NoteItemProps {
-  note: INote;
+  note: NoteEntity;
   onModal: (id: string) => void;
 }
 
 export const NoteItem = ({ note, onModal }: NoteItemProps) => {
-  const { deleteNote, updateNote, fetchFullNote, loading } = useNotesStore();
+  const updateNote = useNoteStoreV2((state) => state.updateNote);
+  const deleteNote = useNoteStoreV2((state) => state.deleteNote);
+
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState('');
-  const [fullNote, setFullNote] = useState<boolean>(false);
-  const [loadingFull, setLoadingFull] = useState(false);
 
-  if (isEditing && fullNote && editContent === '') { setEditContent(note.content) }
-
-  const handleEditClick = async () => {
-    setLoadingFull(true);
-    setIsEditing(true);
-    try {
-      let full = await fetchFullNote(note.id);
-      setFullNote(true);
-      //setEditContent(note.content);
-    } catch (error) {
-      console.error('Failed to load full note:', error);
-      setEditContent('Failed to load full note:');
-    } finally {
-      setLoadingFull(false);
-    }
-  };
+  const [text, setText] = useState(note.body ? note.body : note.title);
 
   const handleSave = async () => {
-    if (!editContent.trim()) return;
-    await updateNote(note.id, editContent);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
+    await updateNote(note.id, text);
     setIsEditing(false);
   };
 
@@ -57,17 +36,17 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
       <Card className={styles.editingCard}>
         <textarea
           className={styles.editTextarea}
-          value={editContent}
-          onChange={(e) => setEditContent(e.target.value)}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
           rows={4}
           autoFocus
         />
         <div className={styles.editActions}>
-          <Button size="sm" variant="secondary" onClick={handleCancel}>
-            Cancel
+          <Button size="sm" variant="secondary" onClick={() => setIsEditing(false)}>
+            Отмена
           </Button>
-          <Button size="sm" variant="primary" onClick={handleSave} disabled={loading}>
-            Save
+          <Button size="sm" variant="primary" onClick={handleSave} disabled={false}>
+            Сохранить
           </Button>
         </div>
       </Card>
@@ -80,18 +59,18 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
       <div className={styles.content} onClick={() => {
         onModal(note.id)
       }}>
-        <p className={styles.text}>{note.preview}</p>
+        <p className={styles.text}>{note.title}</p>
         <div className={styles.meta}>
           <span className={styles.date}>📅 {formattedDate}</span>
           {note.updatedAt && <span className={styles.device}>📱 {new Date(note.updatedAt).toLocaleString()}</span>}
         </div>
       </div>
       <div>
-        <Button variant="secondary" size="sm" onClick={handleEditClick}>
-          ✏️ Edit
+        <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
+          ✏️ Редактировать
         </Button>
-        <Button variant="danger" size="sm" onClick={handleDelete} disabled={loading}>
-          🗑️ Delete
+        <Button variant="danger" size="sm" onClick={handleDelete} disabled={false}>
+          🗑️ Удалить
         </Button>
       </div>
 

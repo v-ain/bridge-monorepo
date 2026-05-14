@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useNotesStore } from '../../store/useNotesStore';
 import { NoteItem } from './NoteItem';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { ErrorMessage } from '../ErrorMessage';
 import styles from './NoteList.module.scss';
 import { NoteDetail } from './NoteDetail';
 import Modal from '../modal/Modal';
+import { useNoteStoreV2 } from '@/store/useNoteStoreV2';
 
 export const NoteList = () => {
-  const { notes, loading, error, fetchNotes } = useNotesStore();
+  const { notes, isLoading, error, fetchNotes } = useNoteStoreV2();
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
 
   const closeSelectModalWindow = () => { setSelectedNote(null) }
@@ -17,7 +17,7 @@ export const NoteList = () => {
     fetchNotes();
   }, [fetchNotes]);
 
-  if (loading && notes.length === 0) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
