@@ -53,6 +53,8 @@ export interface ApiResponse<T> {
   error: string | null;
 }
 
+export * from './src/schemas/note.schema';
+
 export interface Note {
   id: string;
   content: string;
