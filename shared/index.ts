@@ -54,7 +54,7 @@ export interface ApiResponse<T> {
 }
 
 export * from './src/schemas/note.schema';
-
+export { z } from 'zod';
 export interface Note {
   id: string;
   content: string;
