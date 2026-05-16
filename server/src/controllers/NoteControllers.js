@@ -30,14 +30,25 @@ export class NoteController {
     }
   }
 
-  // GET /notes/:id
-  handleGetNoteById = async (req, res, id) => {
-    // console.log('handler get note :' + id);
+  /**
+   * GET /api/notes:id
+   * @param {import('node:http').IncomingMessage} req
+   * @param {import('node:http').ServerResponse} res
+   * @param {string} id
+   */
+  getNoteByIdHandler = async (req, res, id) => {
     try {
       const note = await this.noteService.getById(id);
-      this._sendResponse(res, 200, note);
+
+      if (!note) {
+        return this._sendResponse(res, 404, { error: 'NOTE_NOT_FOUND' });
+      }
+
+      return this._sendResponse(res, 200, note);
+
     } catch (err) {
-      this._sendResponse(res, 500, { error: err.message })
+      console.error(`[SERVER ERROR] [GET /api/notes/:id]:`, err);
+      this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' })
     }
   }
 
