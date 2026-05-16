@@ -22,7 +22,7 @@ const routes = {
   },
 
   'POST /auth': handleAuth,
-  'POST /api/notes': noteController.handleCreateNote,
+  'POST /api/notes': noteController.createNoteHandler,
   'GET /api/notes': noteController.handleGetAll,
 };
 

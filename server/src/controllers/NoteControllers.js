@@ -2,6 +2,8 @@
  * @typedef {import('@bridge-monorepo/shared').INoteService} INoteService
  */
 
+import { NoteInputSchema, z } from '@bridge-monorepo/shared';
+
 
 export class NoteController {
   /** @param {INoteService} noteService */
@@ -31,8 +33,13 @@ export class NoteController {
     }
   }
 
-  // POST /api/notes
-  handleCreateNote = async (req, res) => {
+
+  /**
+   * POST /api/notes
+   * @param {import('node:http').IncomingMessage} req
+   * @param {import('node:http').ServerResponse} res
+   */
+  createNoteHandler = async (req, res) => {
     let requestSize = 0; // Для доступа в блоке finally
     let createdNoteId = 'new'; // Заглушка, если заметка не создастся
 
@@ -40,28 +47,36 @@ export class NoteController {
       const { data, size } = await this._parseRequestBody(req);
       requestSize = size;
 
-      // if (!body.title) return this._sendResponse(res, 400, { error: 'No title' }); // 3. Валидируем форму
+      const { title } = NoteInputSchema.parse(data)
 
-      const note = await this.noteService.create(data.title);
-      createdNoteId = note.id;
+      const newNote = await this.noteService.create(title);
+      createdNoteId = newNote.id;
 
-      this._sendResponse(res, 201, note);
-    } catch (err) {
-      {
-        let status = 500;
+      return this._sendResponse(res, 201, newNote);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // .format() вернет объект, где для каждого поля будет массив его ошибок
+        // Для нашего поля 'title' мы берем самую первую ошибку из массива
+        //  const errorCode = error.format().text?._errors[0] || 'VALIDATION_ERROR';
+        const errorCode = error.issues?.[0]?.message || 'VALIDATION_ERROR';
 
-        // Простой маппинг по тексту ошибки
-        if (err.message === 'Payload Too Large') status = 413;
-        if (err.message.includes('not found')) status = 404;
-        if (err.message.includes('required')) status = 400;
-        this._sendResponse(res, status, { error: err.message }, req);
+        return this._sendResponse(res, 400, errorCode)
       }
 
-      const status = err.message === 'Payload Too Large' ? 413 : 400;
-      this._sendResponse(res, status, { error: err.message }, req);
-      //const status = err.statusCode || 500;
-      //this._sendResponse(res, 500, { error: err.message });
+      if (error.message.includes('Invalid JSON')) {
+        this._sendResponse(res, 400, { error: 'INVALID_JSON_FORMAT' })
+      }
+
+      if (error.message === 'Payload Too Large' || error.status === 413) {
+        return this._sendResponse(res, 413, { error: 'PAYLOAD_TOO_LARGE' }, req);
+      }
+
+      // Любой другой форс-мажор (упала база данных, файловая система и т.д.)
+      console.error(`[SERVER ERROR] [POST /api/notes]:`, error);
+      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
+
     } finally {
+      // Выполнится в любом случае (и в случае успеха, и после ошибки)
       const time = new Date().toLocaleTimeString();
       console.log(`[${time}] Note [${createdNoteId}] processed (${requestSize} bytes)`);
     }
@@ -170,13 +185,13 @@ export class NoteController {
   };
 
   /**
- * Универсальный метод отправки ответа
- * @template T
- * @param {import('node:http').ServerResponse} res
- * @param {number} status
- * @param {T | {error: string}} payload
- * @param {import('node:http').IncomingMessage} [req] - Опционально для destroy
- */
+  * Универсальный метод отправки ответа
+  * @template T
+  * @param {import('node:http').ServerResponse} res
+  * @param {number} status
+  * @param {T | {error: string}} payload
+  * @param {import('node:http').IncomingMessage} [req] - Опционально для destroy
+  */
   _sendResponse(res, status, payload, req = null) {
     const isError = status >= 400;
 
