@@ -107,43 +107,46 @@ export class NoteController {
    * @param {import('node:http').ServerResponse} res
    * @param {string} id
    */
-  handleUpdateNote = async (req, res, id) => {
+  updateNoteHandler = async (req, res, id) => {
     let requestSize = 0;
-
-    // if (!id) {
-    //   return this._sendResponse(res, 400, { error: 'ID is missing' });
-    // }
-    //
 
     try {
 
       const { data, size } = await this._parseRequestBody(req);
       requestSize = size;
 
-      // Для PATCH мы проверяем наличие хотя бы одного поля для обновления
-      // if (!id || !body.title) {
-      //   return this._sendResponse(res, 400, { error: 'ID and Title are required for patch' });
-      // }
+      const { title } = NoteInputSchema.parse(data);
 
-      // Валидация на уровне контроллера (проверяем "форму" запроса)
-      if (!data.title || typeof data.title !== 'string') {
-        return this._sendResponse(res, 400, { error: 'Title is required and must be a string' });
+      const updatedNote = await this.noteService.update(id, title);
+
+      if (!updatedNote) {
+        return this._sendResponse(res, 404, { error: 'NOTE_NOT_FOUND' });
       }
 
-      // Вызываем сервис (который внутри использует маппер для обрезки)
-      const updatedNote = await this.noteService.update(id, data.title);
+      return this._sendResponse(res, 200, updatedNote);
 
-      this._sendResponse(res, 200, updatedNote);
-    } catch (err) {
-      //const status = err.message.includes('not found') ? 404 : 500;
-      let status = 500;
-      if (err.message === 'Payload Too Large') status = 413;
-      if (err.message.includes('not found')) status = 404;
-      if (err.message.includes('Invalid JSON')) status = 400;
+    } catch (error) {
 
-      this._sendResponse(res, status, { error: err.message }, req);
+      if (error instanceof z.ZodError) {
+        const errorCode = error.issues?.[0]?.message || 'VALIDATION_ERROR';
+        return this._sendResponse(res, 400, { error: errorCode });
+      }
+
+      if (error.message?.includes('Invalid JSON')) {
+        return this._sendResponse(res, 400, { error: 'INVALID_JSON_FORMAT' });
+      }
+
+      if (error.message === 'Payload Too Large' || error.status === 413) {
+        return this._sendResponse(res, 413, { error: 'PAYLOAD_TOO_LARGE' }, req);
+      }
+
+      console.error(`[SERVER ERROR] [PATCH /api/notes/:id]:`, error);
+      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
+
     } finally {
-      console.log(`[${new Date().toLocaleTimeString()}] Note [${id}] UPDATED (${requestSize} bytes)`);
+      // Лог сработает ВСЕГДА и зафиксирует реальный размер обработанных байт
+      const time = new Date().toLocaleTimeString();
+      console.log(`[${time}] Note [${id}] UPDATED (${requestSize} bytes)`);
     }
   }
 

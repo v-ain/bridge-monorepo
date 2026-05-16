@@ -130,7 +130,7 @@ export class NoteService {
     });
 
     if (!updatedNote) {
-      throw new Error(`Note with id ${id} not found`);
+      return null;
     }
 
     await this._sync(nextNotes);
