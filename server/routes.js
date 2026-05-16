@@ -23,7 +23,7 @@ const routes = {
 
   'POST /auth': handleAuth,
   'POST /api/notes': noteController.createNoteHandler,
-  'GET /api/notes': noteController.handleGetAll,
+  'GET /api/notes': noteController.getAllNotesHandler,
 };
 
 // ========== ДИНАМИЧЕСКИЕ МАРШРУТЫ (пока пустые) ==========

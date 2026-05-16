@@ -12,13 +12,21 @@ export class NoteController {
     this.noteService = noteService;
   }
 
-  // GET /api/notes
-  handleGetAll = async (req, res) => {
+
+  /**
+   * GET /api/notes
+   * @param {import('node:http').IncomingMessage} req
+   * @param {import('node:http').ServerResponse} res
+   */
+  getAllNotesHandler = async (req, res) => {
     try {
       const notes = await this.noteService.getAll();
-      this._sendResponse(res, 200, notes);
+
+      return this._sendResponse(res, 200, notes);
     } catch (err) {
-      this._sendResponse(res, 500, { error: err.message });
+      console.error(`[SERVER ERROR] [GET /api/notes]:`, err);
+
+      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
     }
   }
 
