@@ -151,15 +151,27 @@ export class NoteController {
   }
 
 
-  // DELETE /api/notes/:id
-  handleRemoveNote = async (req, res, id) => {
-    // service.delete(id), ответил 204 No Content (или 200 OK).
+  /**
+   * DELETE /api/notes/:id
+   * @param {import('node:http').IncomingMessage} req
+   * @param {import('node:http').ServerResponse} res
+   * @param {string} id
+   */
+  deleteNoteHandler = async (req, res, id) => {
     try {
-      await this.noteService.delete(id);
-      this._sendResponse(res, 200, { id, deleted: true })
-    } catch (err) {
-      const status = err.message.includes('not found') ? 404 : 500;
-      this._sendResponse(res, status, { error: err.message });
+      const result = await this.noteService.delete(id);
+
+      if (!result) {
+        return this._sendResponse(res, 404, { error: 'NOTE_NOT_FOUND' });
+      }
+
+      // Успешное удаление. Обычно возвращают либо { id }, либо статус 204 No Content.
+      return this._sendResponse(res, 200, result);
+
+    } catch (error) {
+      console.error(`[SERVER ERROR] [DELETE /api/notes/:id]:`, error);
+      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
+
     } finally {
       console.log(`[${new Date().toLocaleTimeString()}] Note [${id}] DELETED`);
     }
