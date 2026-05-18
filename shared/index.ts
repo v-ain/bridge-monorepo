@@ -47,11 +47,32 @@ export interface INoteService {
   delete(id: string): Promise<DeleteNoteResponse>;
 }
 
-// Standard API Wrapper
-export interface ApiResponse<T> {
-  data: T | null;
-  error: string | null;
-}
+export * from './src/schemas/note.schema';
+export { z } from 'zod';
+
+export type AppErrorCode =
+
+  | 'NOTE_EMPTY'
+  | 'NOTE_TOO_LONG'
+  | 'INVALID_JSON_FORMAT'
+
+  | 'VALIDATION_ERROR'
+  | 'NOTE_NOT_FOUND'
+  | 'PAYLOAD_TOO_LARGE'
+
+  | 'INTERNAL_SERVER_ERROR';
+
+export type ApiSuccessResponse<T> = {
+  data: T;
+  error: null;
+};
+
+export type ApiErrorResponse = {
+  data: null;
+  error: AppErrorCode;
+};
+
+export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 export interface Note {
   id: string;

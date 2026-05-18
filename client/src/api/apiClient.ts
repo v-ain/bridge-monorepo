@@ -1,8 +1,9 @@
-import { ApiResponse, NoteDetailsDto, NoteEntity, NotePreviewDto } from '@bridge-monorepo/shared';
+import { ApiResponse, NoteEntity } from '@bridge-monorepo/shared';
 
 const BASE_URL = 'http://192.168.0.101:3000';
 
-async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+// Изменили Promise<T> на Promise<ApiResponse<T>>
+async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
   const url = `${BASE_URL}/api${endpoint}`;
 
   const headers: Record<string, string> = {
@@ -13,33 +14,31 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
   try {
     const response = await fetch(url, { ...options, headers });
 
-    // Универсальная защита: если сервер ответил ошибкой (400, 404, 413, 500)
-    if (!response.ok && response.status !== 413) {
-      // Пытаемся распарсить ошибку из ApiResponse, если это возможно
-      try {
-        const errResult: ApiResponse<null> = await response.json();
-        if (errResult.error) throw new Error(errResult.error);
-      } catch {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    }
-
-    // Если сработал наш лимит 413, тело запроса уничтожено, json() вызвать не получится
+    // 1. Обработка жесткого лимита 413 Node.js сервера (соединение оборвано, тело читать нельзя)
     if (response.status === 413) {
-      throw new Error('Payload Too Large');
+      return { data: null, error: 'PAYLOAD_TOO_LARGE' };
     }
 
-    // Парсим успешный ответ в формате ApiResponse
-    const result: ApiResponse<T> = await response.json();
+    // 2. Безопасный парсинг JSON.
+    // Поскольку наш бэкенд ТЕПЕРЬ ВСЕГДА возвращает структуру ApiResponse (и при 200, и при 400/404/500),
+    // мы можем просто попытаться прочитать этот объект.
+    try {
+      const result: ApiResponse<T> = await response.json();
 
-    if (result.error) {
-      throw new Error(result.error);
+      // Сервер вернул валидный JSON в нашем формате. Просто отдаем его наружу!
+      // Там уже лежит либо { data: T, error: null }, либо { data: null, error: AppErrorCode }
+      return result;
+    } catch {
+      // Сюда мы попадем, если сервер упал настолько жестко, что выдал не JSON, а битый текст/HTML
+      return { data: null, error: 'INTERNAL_SERVER_ERROR' };
     }
-    // Возвращаем чистые данные наружу в Zustand
-    return result.data as T;
+
   } catch (error: any) {
-    console.error(`[API Error] ${endpoint}:`, error.message);
-    throw error;
+    // 3. Перехват критических сетевых аварий (у пользователя пропал Wi-Fi, DNS не разрешился и т.д.)
+    console.error(`[API Network/System Error] ${endpoint}:`, error.message);
+
+    // Вместо падения приложения возвращаем безопасный объект ошибки
+    return { data: null, error: 'INTERNAL_SERVER_ERROR' };
   }
 }
 
@@ -59,7 +58,7 @@ export const notesApi = {
     body: JSON.stringify({ title })
   }),
 
-  delete: (id: string) => apiRequest<{ id: string; deleted: boolean }>(`/notes/${id}`, {
+  delete: (id: string) => apiRequest<{ id: string }>(`/notes/${id}`, {
     method: 'DELETE'
   }),
 };

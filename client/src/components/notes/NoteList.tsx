@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useNotesStore } from '../../store/useNotesStore';
 import { NoteItem } from './NoteItem';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { ErrorMessage } from '../ErrorMessage';
 import styles from './NoteList.module.scss';
 import { NoteDetail } from './NoteDetail';
 import Modal from '../modal/Modal';
+import { useNoteStore } from '@/store/useNoteStore';
+import { getErrorMessage } from '@/utils/errorMessages';
 
 export const NoteList = () => {
-  const { notes, loading, error, fetchNotes } = useNotesStore();
+  const { notes, isLoading, globalError: error, fetchNotes } = useNoteStore();
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
 
   const closeSelectModalWindow = () => { setSelectedNote(null) }
@@ -17,12 +18,12 @@ export const NoteList = () => {
     fetchNotes();
   }, [fetchNotes]);
 
-  if (loading && notes.length === 0) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={fetchNotes} />;
+    return <ErrorMessage message={getErrorMessage(error)} onRetry={fetchNotes} />;
   }
 
   if (notes.length === 0) {

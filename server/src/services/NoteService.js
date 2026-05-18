@@ -130,7 +130,7 @@ export class NoteService {
     });
 
     if (!updatedNote) {
-      throw new Error(`Note with id ${id} not found`);
+      return null;
     }
 
     await this._sync(nextNotes);
@@ -147,21 +147,26 @@ export class NoteService {
     // 1. Загружаем данные в кеш
     await this._loadData();
 
-    // 2. Создаем новый массив БЕЗ заметки с этим id
-    const nextNotes = this._notes.filter(note => note.id !== id);
+    // 2. Ищем индекс за ОДИН проход. 
+    // Метод остановится сразу, как только найдет совпадение.
+    const index = this._notes.findIndex(note => note.id === id);
 
-    // Если размер массива не изменился, значит удалять было нечего
-    // if (nextNotes.length === this._notes.length) {
-    //   return { success: false };
-    // }
+    // Если индекс -1, значит заметки нет. Выходим мгновенно.
+    if (index === -1) {
+      return null;
+    }
 
-    // 3. Синхронизируем новый массив с файлом и кешем
+    // 3. Создаем новый массив БЕЗ этой заметки (иммутабельно)
+    // Используем slice: копируем всё ДО индекса и всё ПОСЛЕ индекса.
+    // Это работает быстрее, чем .filter(), так как V8 точно знает границы копирования.
+    const nextNotes = [
+      ...this._notes.slice(0, index),
+      ...this._notes.slice(index + 1)
+    ];
+
+    // 4. Синхронизируем с диском только измененные данные
     await this._sync(nextNotes);
 
-    //return { success: true };
-    //Иногда в контроллере полезно знать, была ли удалена заметка, чтобы вернуть 204 No Content (успех) или 404 Not Found (если такой заметки и не было). Именно поэтому я добавил проверку длины массива и возврат success.
-
-    return { id: id }
+    return { id };
   }
 }
-

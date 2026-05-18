@@ -1,38 +1,45 @@
 import React, { useState } from 'react';
-import { useNotesStore } from '../../store/useNotesStore';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import styles from './NoteForm.module.scss';
+import { useNoteStore } from '@/store/useNoteStore';
 
 export const NoteForm = () => {
-  const [content, setContent] = useState('');
-  const { addNote, loading } = useNotesStore();
+  const addNote = useNoteStore((state) => state.addNote);
+  const isLoading = useNoteStore((state) => state.isLoading);
+  const [text, setText] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    // Простая защита от пустых строк
+    if (!text.trim()) return;
 
-    await addNote(content);
-    setContent('');
+    try {
+      await addNote(text);
+      setText('');
+    } catch (err) {
+      // Ошибку можно не обрабатывать локально, она уже запишется в глобальный стейт стора
+      console.error('Ошибка при создании заметки в UI');
+    }
   };
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <Input
-        value={content}
-        onChange={setContent}
+        value={text}
+        onChange={setText}
         placeholder="Write your note here..."
         type="textarea"
         rows={3}
-        disabled={loading}
+        disabled={isLoading}
       />
       <Button
         type="submit"
         variant="primary"
-        disabled={loading || !content.trim()}
-        loading={loading}
+        disabled={isLoading || !text.trim()}
+        loading={isLoading}
       >
-        Add Note
+        {isLoading ? 'Сохранение...' : 'Создать заметку'}
       </Button>
     </form>
   );

@@ -1,18 +1,13 @@
-import { useEffect } from 'react';
-import { useNotesStore } from '../../store/useNotesStore';
 import styles from './NoteDetail.module.scss';
+import { useNoteStore } from '@/store/useNoteStore';
 
 interface NoteDetailProps {
   noteId: string;
 }
 
 export const NoteDetail = ({ noteId }: NoteDetailProps) => {
-  const { notes, fetchFullNote } = useNotesStore();
-  const note = notes.find(n => n.id === noteId);
+  const note = useNoteStore((state) => state.notes.find((n) => n.id === noteId));
 
-  useEffect(() => {
-    fetchFullNote(noteId)
-  }, [])
   if (!note) {
     return (
       <div>
@@ -27,7 +22,7 @@ export const NoteDetail = ({ noteId }: NoteDetailProps) => {
         <h3>Note Details</h3>
       </div>
       <div className={styles.content}>
-        <p>{note.content}</p>
+        <p>{note.body ?? note.title}</p>
       </div>
       <div className={styles.meta}>
         <span>📅 {new Date(note.createdAt).toLocaleString()}</span>

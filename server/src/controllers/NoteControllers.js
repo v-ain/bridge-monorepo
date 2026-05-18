@@ -2,6 +2,8 @@
  * @typedef {import('@bridge-monorepo/shared').INoteService} INoteService
  */
 
+import { NoteInputSchema, z } from '@bridge-monorepo/shared';
+
 
 export class NoteController {
   /** @param {INoteService} noteService */
@@ -10,29 +12,53 @@ export class NoteController {
     this.noteService = noteService;
   }
 
-  // GET /api/notes
-  handleGetAll = async (req, res) => {
+
+  /**
+   * GET /api/notes
+   * @param {import('node:http').IncomingMessage} req
+   * @param {import('node:http').ServerResponse} res
+   */
+  getAllNotesHandler = async (req, res) => {
     try {
       const notes = await this.noteService.getAll();
-      this._sendResponse(res, 200, notes);
+
+      return this._sendResponse(res, 200, notes);
     } catch (err) {
-      this._sendResponse(res, 500, { error: err.message });
+      console.error(`[SERVER ERROR] [GET /api/notes]:`, err);
+
+      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
     }
   }
 
-  // GET /notes/:id
-  handleGetNoteById = async (req, res, id) => {
-    // console.log('handler get note :' + id);
+  /**
+   * GET /api/notes:id
+   * @param {import('node:http').IncomingMessage} req
+   * @param {import('node:http').ServerResponse} res
+   * @param {string} id
+   */
+  getNoteByIdHandler = async (req, res, id) => {
     try {
       const note = await this.noteService.getById(id);
-      this._sendResponse(res, 200, note);
+
+      if (!note) {
+        return this._sendResponse(res, 404, { error: 'NOTE_NOT_FOUND' });
+      }
+
+      return this._sendResponse(res, 200, note);
+
     } catch (err) {
-      this._sendResponse(res, 500, { error: err.message })
+      console.error(`[SERVER ERROR] [GET /api/notes/:id]:`, err);
+      this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' })
     }
   }
 
-  // POST /api/notes
-  handleCreateNote = async (req, res) => {
+
+  /**
+   * POST /api/notes
+   * @param {import('node:http').IncomingMessage} req
+   * @param {import('node:http').ServerResponse} res
+   */
+  createNoteHandler = async (req, res) => {
     let requestSize = 0; // Для доступа в блоке finally
     let createdNoteId = 'new'; // Заглушка, если заметка не создастся
 
@@ -40,28 +66,36 @@ export class NoteController {
       const { data, size } = await this._parseRequestBody(req);
       requestSize = size;
 
-      // if (!body.title) return this._sendResponse(res, 400, { error: 'No title' }); // 3. Валидируем форму
+      const { title } = NoteInputSchema.parse(data)
 
-      const note = await this.noteService.create(data.title);
-      createdNoteId = note.id;
+      const newNote = await this.noteService.create(title);
+      createdNoteId = newNote.id;
 
-      this._sendResponse(res, 201, note);
-    } catch (err) {
-      {
-        let status = 500;
+      return this._sendResponse(res, 201, newNote);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // .format() вернет объект, где для каждого поля будет массив его ошибок
+        // Для нашего поля 'title' мы берем самую первую ошибку из массива
+        //  const errorCode = error.format().text?._errors[0] || 'VALIDATION_ERROR';
+        const errorCode = error.issues?.[0]?.message || 'VALIDATION_ERROR';
 
-        // Простой маппинг по тексту ошибки
-        if (err.message === 'Payload Too Large') status = 413;
-        if (err.message.includes('not found')) status = 404;
-        if (err.message.includes('required')) status = 400;
-        this._sendResponse(res, status, { error: err.message }, req);
+        return this._sendResponse(res, 400, errorCode)
       }
 
-      const status = err.message === 'Payload Too Large' ? 413 : 400;
-      this._sendResponse(res, status, { error: err.message }, req);
-      //const status = err.statusCode || 500;
-      //this._sendResponse(res, 500, { error: err.message });
+      if (error.message.includes('Invalid JSON')) {
+        this._sendResponse(res, 400, { error: 'INVALID_JSON_FORMAT' })
+      }
+
+      if (error.message === 'Payload Too Large' || error.status === 413) {
+        return this._sendResponse(res, 413, { error: 'PAYLOAD_TOO_LARGE' }, req);
+      }
+
+      // Любой другой форс-мажор (упала база данных, файловая система и т.д.)
+      console.error(`[SERVER ERROR] [POST /api/notes]:`, error);
+      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
+
     } finally {
+      // Выполнится в любом случае (и в случае успеха, и после ошибки)
       const time = new Date().toLocaleTimeString();
       console.log(`[${time}] Note [${createdNoteId}] processed (${requestSize} bytes)`);
     }
@@ -73,56 +107,71 @@ export class NoteController {
    * @param {import('node:http').ServerResponse} res
    * @param {string} id
    */
-  handleUpdateNote = async (req, res, id) => {
+  updateNoteHandler = async (req, res, id) => {
     let requestSize = 0;
-
-    // if (!id) {
-    //   return this._sendResponse(res, 400, { error: 'ID is missing' });
-    // }
-    //
 
     try {
 
       const { data, size } = await this._parseRequestBody(req);
       requestSize = size;
 
-      // Для PATCH мы проверяем наличие хотя бы одного поля для обновления
-      // if (!id || !body.title) {
-      //   return this._sendResponse(res, 400, { error: 'ID and Title are required for patch' });
-      // }
+      const { title } = NoteInputSchema.parse(data);
 
-      // Валидация на уровне контроллера (проверяем "форму" запроса)
-      if (!data.title || typeof data.title !== 'string') {
-        return this._sendResponse(res, 400, { error: 'Title is required and must be a string' });
+      const updatedNote = await this.noteService.update(id, title);
+
+      if (!updatedNote) {
+        return this._sendResponse(res, 404, { error: 'NOTE_NOT_FOUND' });
       }
 
-      // Вызываем сервис (который внутри использует маппер для обрезки)
-      const updatedNote = await this.noteService.update(id, data.title);
+      return this._sendResponse(res, 200, updatedNote);
 
-      this._sendResponse(res, 200, updatedNote);
-    } catch (err) {
-      //const status = err.message.includes('not found') ? 404 : 500;
-      let status = 500;
-      if (err.message === 'Payload Too Large') status = 413;
-      if (err.message.includes('not found')) status = 404;
-      if (err.message.includes('Invalid JSON')) status = 400;
+    } catch (error) {
 
-      this._sendResponse(res, status, { error: err.message }, req);
+      if (error instanceof z.ZodError) {
+        const errorCode = error.issues?.[0]?.message || 'VALIDATION_ERROR';
+        return this._sendResponse(res, 400, { error: errorCode });
+      }
+
+      if (error.message?.includes('Invalid JSON')) {
+        return this._sendResponse(res, 400, { error: 'INVALID_JSON_FORMAT' });
+      }
+
+      if (error.message === 'Payload Too Large' || error.status === 413) {
+        return this._sendResponse(res, 413, { error: 'PAYLOAD_TOO_LARGE' }, req);
+      }
+
+      console.error(`[SERVER ERROR] [PATCH /api/notes/:id]:`, error);
+      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
+
     } finally {
-      console.log(`[${new Date().toLocaleTimeString()}] Note [${id}] UPDATED (${requestSize} bytes)`);
+      // Лог сработает ВСЕГДА и зафиксирует реальный размер обработанных байт
+      const time = new Date().toLocaleTimeString();
+      console.log(`[${time}] Note [${id}] UPDATED (${requestSize} bytes)`);
     }
   }
 
 
-  // DELETE /api/notes/:id
-  handleRemoveNote = async (req, res, id) => {
-    // service.delete(id), ответил 204 No Content (или 200 OK).
+  /**
+   * DELETE /api/notes/:id
+   * @param {import('node:http').IncomingMessage} req
+   * @param {import('node:http').ServerResponse} res
+   * @param {string} id
+   */
+  deleteNoteHandler = async (req, res, id) => {
     try {
-      await this.noteService.delete(id);
-      this._sendResponse(res, 200, { id, deleted: true })
-    } catch (err) {
-      const status = err.message.includes('not found') ? 404 : 500;
-      this._sendResponse(res, status, { error: err.message });
+      const result = await this.noteService.delete(id);
+
+      if (!result) {
+        return this._sendResponse(res, 404, { error: 'NOTE_NOT_FOUND' });
+      }
+
+      // Успешное удаление. Обычно возвращают либо { id }, либо статус 204 No Content.
+      return this._sendResponse(res, 200, result);
+
+    } catch (error) {
+      console.error(`[SERVER ERROR] [DELETE /api/notes/:id]:`, error);
+      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
+
     } finally {
       console.log(`[${new Date().toLocaleTimeString()}] Note [${id}] DELETED`);
     }
@@ -170,19 +219,21 @@ export class NoteController {
   };
 
   /**
- * Универсальный метод отправки ответа
- * @template T
- * @param {import('node:http').ServerResponse} res
- * @param {number} status
- * @param {T | {error: string}} payload
- * @param {import('node:http').IncomingMessage} [req] - Опционально для destroy
- */
+  * Универсальный метод отправки ответа
+  * @template T
+  * @param {import('node:http').ServerResponse} res
+  * @param {number} status
+  * @param {T | {error: string}} payload
+  * @param {import('node:http').IncomingMessage} [req] - Опционально для destroy
+  */
   _sendResponse(res, status, payload, req = null) {
     const isError = status >= 400;
 
     /** @type {import('@bridge-monorepo/shared').ApiResponse<T>} */
     const response = {
       data: isError ? null : /** @type {T} */ (payload),
+      // TODO: Убрать @ts-ignore в следующем спринте после типизации NoteService
+      // @ts-ignore
       error: isError
         ? (typeof payload === 'object' && payload !== null && 'error' in payload
           ? String(payload.error)
