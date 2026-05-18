@@ -6,9 +6,10 @@ import styles from './NoteList.module.scss';
 import { NoteDetail } from './NoteDetail';
 import Modal from '../modal/Modal';
 import { useNoteStore } from '@/store/useNoteStore';
+import { getErrorMessage } from '@/utils/errorMessages';
 
 export const NoteList = () => {
-  const { notes, isLoading, error, fetchNotes } = useNoteStore();
+  const { notes, isLoading, globalError: error, fetchNotes } = useNoteStore();
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
 
   const closeSelectModalWindow = () => { setSelectedNote(null) }
@@ -22,7 +23,7 @@ export const NoteList = () => {
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={fetchNotes} />;
+    return <ErrorMessage message={getErrorMessage(error)} onRetry={fetchNotes} />;
   }
 
   if (notes.length === 0) {
