@@ -232,6 +232,8 @@ export class NoteController {
     /** @type {import('@bridge-monorepo/shared').ApiResponse<T>} */
     const response = {
       data: isError ? null : /** @type {T} */ (payload),
+      // TODO: Убрать @ts-ignore в следующем спринте после типизации NoteService
+      // @ts-ignore
       error: isError
         ? (typeof payload === 'object' && payload !== null && 'error' in payload
           ? String(payload.error)
