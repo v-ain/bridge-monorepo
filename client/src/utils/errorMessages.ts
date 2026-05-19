@@ -1,4 +1,4 @@
-import { AppErrorCode } from "@shared/index";
+import { AppErrorCode } from '@bridge-monorepo/shared';
 
 
 /**

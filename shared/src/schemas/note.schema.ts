@@ -8,3 +8,4 @@ export const NoteInputSchema = z.object({
     .max(10000, { message: 'NOTE_TOO_LONG' }),
 });
 
+export type NoteInput = z.infer<typeof NoteInputSchema>;

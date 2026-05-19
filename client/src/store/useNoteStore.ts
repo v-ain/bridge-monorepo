@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { notesApi } from '@/api/apiClient';
-import { AppErrorCode, NoteEntity } from '@shared/index';
+import { AppErrorCode, NoteEntity } from '@bridge-monorepo/shared';
 
 interface NoteState {
   notes: NoteEntity[];
