@@ -22,11 +22,10 @@ export class NoteController {
     try {
       const notes = await this.noteService.getAll();
 
-      return this._sendResponse(res, 200, notes);
+      return this._sendResponse(res, 200, notes, null);
     } catch (err) {
-      console.error(`[SERVER ERROR] [GET /api/notes]:`, err);
-
-      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
+      // Перенаправляем в единый центр — он сам залогирует и отдаст 500
+      return this._handleSystemError(res, err, null, '[GET /api/notes]');
     }
   }
 
@@ -41,14 +40,13 @@ export class NoteController {
       const note = await this.noteService.getById(id);
 
       if (!note) {
-        return this._sendResponse(res, 404, { error: 'NOTE_NOT_FOUND' });
+        return this._sendResponse(res, 404, null, 'NOTE_NOT_FOUND');
       }
 
-      return this._sendResponse(res, 200, note);
+      return this._sendResponse(res, 200, note, null);
 
     } catch (err) {
-      console.error(`[SERVER ERROR] [GET /api/notes/:id]:`, err);
-      this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' })
+      return this._handleSystemError(res, err, null, `[GET /api/notes/${id}]`);
     }
   }
 
@@ -71,28 +69,17 @@ export class NoteController {
       const newNote = await this.noteService.create(title);
       createdNoteId = newNote.id;
 
-      return this._sendResponse(res, 201, newNote);
+      return this._sendResponse(res, 201, newNote, null);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        // .format() вернет объект, где для каждого поля будет массив его ошибок
-        // Для нашего поля 'title' мы берем самую первую ошибку из массива
-        //  const errorCode = error.format().text?._errors[0] || 'VALIDATION_ERROR';
-        const errorCode = error.issues?.[0]?.message || 'VALIDATION_ERROR';
-
-        return this._sendResponse(res, 400, errorCode)
+        // Явно кастим строку к типу AppErrorCode
+        const errorCode = /** @type {import('@bridge-monorepo/shared').AppErrorCode} */ (
+          error.issues?.[0]?.message || 'VALIDATION_ERROR'
+        ); return this._sendResponse(res, 400, null, errorCode)
       }
 
-      if (error.message.includes('Invalid JSON')) {
-        this._sendResponse(res, 400, { error: 'INVALID_JSON_FORMAT' })
-      }
-
-      if (error.message === 'Payload Too Large' || error.status === 413) {
-        return this._sendResponse(res, 413, { error: 'PAYLOAD_TOO_LARGE' }, req);
-      }
-
-      // Любой другой форс-мажор (упала база данных, файловая система и т.д.)
-      console.error(`[SERVER ERROR] [POST /api/notes]:`, error);
-      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
+      // Все остальные системные ошибки отправляем в наш новый обработчик
+      return this._handleSystemError(res, error, req, '[POST /api/notes]');
 
     } finally {
       // Выполнится в любом случае (и в случае успеха, и после ошибки)
@@ -120,28 +107,22 @@ export class NoteController {
       const updatedNote = await this.noteService.update(id, title);
 
       if (!updatedNote) {
-        return this._sendResponse(res, 404, { error: 'NOTE_NOT_FOUND' });
+        return this._sendResponse(res, 404, null, 'NOTE_NOT_FOUND');
       }
 
-      return this._sendResponse(res, 200, updatedNote);
+      return this._sendResponse(res, 200, updatedNote, null);
 
     } catch (error) {
 
       if (error instanceof z.ZodError) {
-        const errorCode = error.issues?.[0]?.message || 'VALIDATION_ERROR';
-        return this._sendResponse(res, 400, { error: errorCode });
+        const errorCode = /** @type {import('@bridge-monorepo/shared').AppErrorCode} */ (
+          error.issues?.[0]?.message || 'VALIDATION_ERROR'
+        );
+        return this._sendResponse(res, 400, null, errorCode);
       }
 
-      if (error.message?.includes('Invalid JSON')) {
-        return this._sendResponse(res, 400, { error: 'INVALID_JSON_FORMAT' });
-      }
-
-      if (error.message === 'Payload Too Large' || error.status === 413) {
-        return this._sendResponse(res, 413, { error: 'PAYLOAD_TOO_LARGE' }, req);
-      }
-
-      console.error(`[SERVER ERROR] [PATCH /api/notes/:id]:`, error);
-      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
+      // Все остальные системные сбои (JSON, Payload, 500) отправляем в центральный обработчик
+      return this._handleSystemError(res, error, null, `[PATCH /api/notes/${id}]`);
 
     } finally {
       // Лог сработает ВСЕГДА и зафиксирует реальный размер обработанных байт
@@ -162,15 +143,15 @@ export class NoteController {
       const result = await this.noteService.delete(id);
 
       if (!result) {
-        return this._sendResponse(res, 404, { error: 'NOTE_NOT_FOUND' });
+        return this._sendResponse(res, 404, null, 'NOTE_NOT_FOUND');
       }
 
       // Успешное удаление. Обычно возвращают либо { id }, либо статус 204 No Content.
-      return this._sendResponse(res, 200, result);
+      return this._sendResponse(res, 200, result, null);
 
     } catch (error) {
-      console.error(`[SERVER ERROR] [DELETE /api/notes/:id]:`, error);
-      return this._sendResponse(res, 500, { error: 'INTERNAL_SERVER_ERROR' });
+
+      return this._handleSystemError(res, error, null, `[DELETE /api/notes/${id}]`);
 
     } finally {
       console.log(`[${new Date().toLocaleTimeString()}] Note [${id}] DELETED`);
@@ -219,34 +200,50 @@ export class NoteController {
   };
 
   /**
-  * Универсальный метод отправки ответа
-  * @template T
-  * @param {import('node:http').ServerResponse} res
-  * @param {number} status
-  * @param {T | {error: string}} payload
-  * @param {import('node:http').IncomingMessage} [req] - Опционально для destroy
-  */
-  _sendResponse(res, status, payload, req = null) {
-    const isError = status >= 400;
-
+   * Универсальный метод отправки ответа.
+   * Строго следует контракту ApiResponse<T> из shared.
+   * 
+   * @template T
+   * @param {import('node:http').ServerResponse} res
+   * @param {number} status - HTTP статус (201, 200, 400, 413, 500)
+   * @param {T | null} data - Данные для успешного ответа (null при ошибке)
+   * @param {import('@bridge-monorepo/shared').AppErrorCode | null} error - Код ошибки (null при успехе)
+   * @param {import('node:http').IncomingMessage} [req] - Для экстренного закрытия соединения (413)
+   */
+  _sendResponse(res, status, data, error, req = null) {
     /** @type {import('@bridge-monorepo/shared').ApiResponse<T>} */
-    const response = {
-      data: isError ? null : /** @type {T} */ (payload),
-      // TODO: Убрать @ts-ignore в следующем спринте после типизации NoteService
-      // @ts-ignore
-      error: isError
-        ? (typeof payload === 'object' && payload !== null && 'error' in payload
-          ? String(payload.error)
-          : String(payload || 'Unknown Error'))
-        : null,
-    };
+    const response = error
+      ? { data: null, error: error }
+      : { data: /** @type {T} */ (data), error: null };
 
     res.writeHead(status, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(response));
-    // res.end(JSON.stringify(payload));
 
     if (status === 413 && req) {
       req.destroy();
     }
+  }
+
+  /**
+   * Централизованный обработчик старых текстовых ошибок для блоков catch.
+   * Принимает сырую ошибку и мапит её на строгие коды AppErrorCode.
+   * 
+   * @param {import('node:http').ServerResponse} res
+   * @param {any} error
+   * @param {import('node:http').IncomingMessage | null} req
+   * @param {string} contextInfo
+   */
+  _handleSystemError(res, error, req, contextInfo) {
+    if (error.message && error.message.includes('Invalid JSON')) {
+      return this._sendResponse(res, 400, null, 'INVALID_JSON_FORMAT');
+    }
+
+    if (error.message === 'Payload Too Large' || error.status === 413) {
+      return this._sendResponse(res, 413, null, 'PAYLOAD_TOO_LARGE', req);
+    }
+
+    // Любой другой форс-мажор (упала база данных, файловая система и т.д.)
+    console.error(`[SERVER ERROR] ${contextInfo}:`, error);
+    return this._sendResponse(res, 500, null, 'INTERNAL_SERVER_ERROR');
   }
 }
