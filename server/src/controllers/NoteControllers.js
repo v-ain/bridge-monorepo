@@ -64,20 +64,26 @@ export class NoteController {
       const { data, size } = await this._parseRequestBody(req);
       requestSize = size;
 
-      const { title } = NoteInputSchema.parse(data)
+      const validation = NoteInputSchema.safeParse(data);
+
+      if (!validation.success) {
+        // 1. Извлекаем первую ошибку из массива (он гарантированно существует, если success === false)
+        const [firstIssue] = validation.error.issues;
+
+        // 2. Берем сообщение или ставим фоллбек, сразу приводя к типу AppErrorCode через JSDoc
+        /** @type {import('@bridge-monorepo/shared').AppErrorCode} */
+        const errorCode = /** @type {any} */ (firstIssue?.message) || 'VALIDATION_ERROR';
+        return this._sendResponse(res, 400, null, errorCode);
+      }
+
+      const { title } = validation.data;
 
       const newNote = await this.noteService.create(title);
       createdNoteId = newNote.id;
 
       return this._sendResponse(res, 201, newNote, null);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        // Явно кастим строку к типу AppErrorCode
-        const errorCode = /** @type {import('@bridge-monorepo/shared').AppErrorCode} */ (
-          error.issues?.[0]?.message || 'VALIDATION_ERROR'
-        ); return this._sendResponse(res, 400, null, errorCode)
-      }
 
+    } catch (error) {
       // Все остальные системные ошибки отправляем в наш новый обработчик
       return this._handleSystemError(res, error, req, '[POST /api/notes]');
 
@@ -102,10 +108,21 @@ export class NoteController {
       const { data, size } = await this._parseRequestBody(req);
       requestSize = size;
 
-      const { title } = NoteInputSchema.parse(data);
+      const validation = NoteInputSchema.safeParse(data);
 
+      // 2. Если валидация провалена — вытаскиваем первую ошибку через деструктуризацию .issues
+      if (!validation.success) {
+        const [firstIssue] = validation.error.issues;
+
+        /** @type {import('@bridge-monorepo/shared').AppErrorCode} */
+        const errorCode = /** @type {any} */ (firstIssue?.message) || 'VALIDATION_ERROR';
+
+        return this._sendResponse(res, 400, null, errorCode);
+      }
+
+      // 3. Данные гарантированно валидны, достаем title
+      const { title } = validation.data;
       const updatedNote = await this.noteService.update(id, title);
-
       if (!updatedNote) {
         return this._sendResponse(res, 404, null, 'NOTE_NOT_FOUND');
       }
@@ -113,14 +130,6 @@ export class NoteController {
       return this._sendResponse(res, 200, updatedNote, null);
 
     } catch (error) {
-
-      if (error instanceof z.ZodError) {
-        const errorCode = /** @type {import('@bridge-monorepo/shared').AppErrorCode} */ (
-          error.issues?.[0]?.message || 'VALIDATION_ERROR'
-        );
-        return this._sendResponse(res, 400, null, errorCode);
-      }
-
       // Все остальные системные сбои (JSON, Payload, 500) отправляем в центральный обработчик
       return this._handleSystemError(res, error, null, `[PATCH /api/notes/${id}]`);
 
