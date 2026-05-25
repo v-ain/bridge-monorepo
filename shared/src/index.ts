@@ -47,8 +47,8 @@ export interface INoteService {
   delete(id: string): Promise<DeleteNoteResponse>;
 }
 
-export * from './src/schemas/note.schema';
 export { z } from 'zod';
+export * from './schemas/note.schema.js';
 
 export type AppErrorCode =
 

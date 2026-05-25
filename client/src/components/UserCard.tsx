@@ -1,4 +1,4 @@
-import { User } from '@shared/index';
+import { User } from '@bridge-monorepo/shared';
 import styles from './UserCard.module.scss';
 
 interface UserCardProps {

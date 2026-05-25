@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { NoteEntity } from '@shared/index';
+import { NoteEntity } from '@bridge-monorepo/shared';
 import styles from './NoteItem.module.scss';
 import { useNoteStore } from '@/store/useNoteStore';
 
