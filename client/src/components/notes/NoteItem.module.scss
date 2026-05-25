@@ -25,7 +25,8 @@
   color: var(--gray-500);
 }
 
-.date, .device {
+.date,
+.device {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
@@ -63,4 +64,33 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-sm);
+}
+
+// стили для новых элементов (ошибки и счетчики)
+
+
+.formMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
+.limit {
+  color: #6c757d;
+}
+
+.errorLimit {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.errorMessage {
+  color: #dc3545;
+}
+
+.inputError {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
