@@ -48,6 +48,7 @@ export interface INoteService {
 }
 
 export { z } from 'zod';
+export type { ZodError } from 'zod';
 export * from './schemas/note.schema.js';
 
 export type AppErrorCode =
