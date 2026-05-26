@@ -1,43 +1,52 @@
-.item {
+.itemLayout {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
   gap: var(--spacing-md);
+  // if Card not padding
+  padding: 4px;
 }
 
 .content {
-  flex: 1;
+  width: 100%;
+  cursor: pointer;
 }
 
 .text {
   font-size: var(--text-base);
   line-height: 1.5;
   color: var(--gray-700);
+  margin: 0;
   margin-bottom: var(--spacing-sm);
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; // Мягко разносит дату и кнопки по углам
+  gap: 12px;
 }
 
 .meta {
   display: flex;
   gap: var(--spacing-md);
   font-size: var(--text-sm);
-  color: var(--gray-500);
+  color: var(--gray-500, #64748b);
 }
 
-.date, .device {
+.date,
+.device {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
 }
 
-// ... существующие стили
-
 .actions {
   display: flex;
   gap: var(--spacing-sm);
-  align-items: center;
 }
+
 
 .editingCard {
   padding: var(--spacing-lg);
@@ -63,4 +72,55 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-sm);
+}
+
+// стили для новых элементов (ошибки и счетчики)
+
+
+.formMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
+.limit {
+  color: #6c757d;
+}
+
+.errorLimit {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.errorMessage {
+  color: #dc3545;
+}
+
+.inputError {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+
+// === АДАПТИВ ПОД МОБИЛКИ ===
+@media (max-width: 480px) {
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .actions,
+  .editActions {
+    width: 100%;
+
+    button {
+      flex: 1;
+      height: 38px;
+      border-radius: 8px;
+      background: var(--gray-50, #f8fafc);
+    }
+  }
 }

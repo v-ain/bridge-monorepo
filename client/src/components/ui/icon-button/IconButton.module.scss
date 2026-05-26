@@ -1,0 +1,41 @@
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--gray-200, #e2e8f0);
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.15s ease-in-out;
+  outline: none;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Дефолтный стиль (Редактировать, Отмена и т.д.)
+.default {
+  color: var(--gray-700, #475569);
+
+  &:hover:not(:disabled) {
+    background: var(--gray-50, #f8fafc);
+    border-color: var(--gray-400, #94a3b8);
+    color: var(--gray-900, #1e293b);
+  }
+}
+
+// Опасный стиль (Удалить)
+.danger {
+  color: var(--gray-600, #64748b);
+
+  &:hover:not(:disabled) {
+    background: #fee2e2; // легкий красный фон
+    border-color: #fca5a5;
+    color: #dc2626;
+  }
+}

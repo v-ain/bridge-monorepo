@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { NoteEntity } from '@bridge-monorepo/shared';
+import { AppErrorCode, NoteEntity } from '@bridge-monorepo/shared';
 import styles from './NoteItem.module.scss';
 import { useNoteStore } from '@/store/useNoteStore';
+import { NoteEditForm } from './NoteEditForm';
+import { IconButton } from '../ui/icon-button/IconButton';
 
 interface NoteItemProps {
   note: NoteEntity;
@@ -18,9 +20,17 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
 
   const [text, setText] = useState(note.body ? note.body : note.title);
 
-  const handleSave = async () => {
-    await updateNote(note.id, text);
-    setIsEditing(false);
+  // Явно подсвечиваем тип возвращаемого значения для соответствия контракту NoteEditForm
+  const handleSave = async (cleanText: string): Promise<AppErrorCode | null> => {
+    // Обязательно возвращаем результат выполнения экшена стора наружу!
+    const serverError = await updateNote(note.id, cleanText);
+
+    if (serverError) {
+      return serverError; // Возвращаем код ошибки в форму
+    }
+
+    setIsEditing(false); // Если null, закрываем режим редактирования
+    return null;
   };
 
   const handleDelete = async () => {
@@ -33,46 +43,43 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
 
   if (isEditing) {
     return (
-      <Card className={styles.editingCard}>
-        <textarea
-          className={styles.editTextarea}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={4}
-          autoFocus
-        />
-        <div className={styles.editActions}>
-          <Button size="sm" variant="secondary" onClick={() => setIsEditing(false)}>
-            Отмена
-          </Button>
-          <Button size="sm" variant="primary" onClick={handleSave} disabled={false}>
-            Сохранить
-          </Button>
-        </div>
-      </Card>
+      <NoteEditForm
+        initialValue={note.body || note.title}
+        onSave={handleSave}
+        onCancel={() => setIsEditing(false)}
+      />
     );
   }
 
 
   return (
-    <Card hover className={styles.item}>
-      <div className={styles.content} onClick={() => {
-        onModal(note.id)
-      }}>
-        <p className={styles.text}>{note.title}</p>
-        <div className={styles.meta}>
-          <span className={styles.date}>📅 {formattedDate}</span>
-          {note.updatedAt && <span className={styles.device}>📱 {new Date(note.updatedAt).toLocaleString()}</span>}
+    <Card hover >
+      <div className={styles.itemLayout}>
+        <div className={styles.content} onClick={() => {
+          onModal(note.id)
+        }}>
+          <p className={styles.text}>{note.title}</p>
+        </div>
+
+        <div className={styles.footer}>
+          <div className={styles.meta}>
+            <span className={styles.date}>📅 {formattedDate}</span>
+            {/* {note.updatedAt && <span className={styles.device}>📱 {new Date(note.updatedAt).toLocaleString()}</span>} */}
+          </div>
+
+          <div className={styles.actions}>
+            <IconButton onClick={() => setIsEditing(true)} title="Редактировать">
+              ✏️
+            </IconButton>
+            <IconButton variant="danger" onClick={handleDelete} title="Удалить">
+              🗑️
+            </IconButton>
+          </div>
+
+
         </div>
       </div>
-      <div>
-        <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
-          ✏️ Редактировать
-        </Button>
-        <Button variant="danger" size="sm" onClick={handleDelete} disabled={false}>
-          🗑️ Удалить
-        </Button>
-      </div>
+
 
     </Card>
   );
