@@ -1,28 +1,38 @@
-.item {
+.itemLayout {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
   gap: var(--spacing-md);
+  // if Card not padding
+  padding: 4px;
 }
 
 .content {
-  flex: 1;
+  width: 100%;
+  cursor: pointer;
 }
 
 .text {
   font-size: var(--text-base);
   line-height: 1.5;
   color: var(--gray-700);
+  margin: 0;
   margin-bottom: var(--spacing-sm);
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; // Мягко разносит дату и кнопки по углам
+  gap: 12px;
 }
 
 .meta {
   display: flex;
   gap: var(--spacing-md);
   font-size: var(--text-sm);
-  color: var(--gray-500);
+  color: var(--gray-500, #64748b);
 }
 
 .date,
@@ -32,12 +42,54 @@
   gap: var(--spacing-xs);
 }
 
-// ... существующие стили
-
 .actions {
   display: flex;
   gap: var(--spacing-sm);
+}
+
+.iconBtn {
+  display: flex;
   align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--gray-200, #e2e8f0);
+  background: transparent;
+  border-radius: 50%; // делаем их круглыми
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--gray-50, #f8fafc);
+    border-color: var(--gray-400, #94a3b8);
+  }
+}
+
+.deleteBtn:hover {
+  background: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+}
+
+// === АДАПТИВ ПОД МОБИЛКИ ===
+@media (max-width: 480px) {
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .actions {
+    width: 100%;
+
+    // На мобилках превращаем круглые иконки в удобные овальные полу-кнопки
+    .iconBtn {
+      flex: 1;
+      border-radius: 6px;
+      height: 36px;
+      background: var(--gray-50, #f8fafc);
+    }
+  }
 }
 
 .editingCard {

@@ -52,24 +52,45 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
 
 
   return (
-    <Card hover className={styles.item}>
-      <div className={styles.content} onClick={() => {
-        onModal(note.id)
-      }}>
-        <p className={styles.text}>{note.title}</p>
-        <div className={styles.meta}>
-          <span className={styles.date}>📅 {formattedDate}</span>
-          {note.updatedAt && <span className={styles.device}>📱 {new Date(note.updatedAt).toLocaleString()}</span>}
+    <Card hover >
+      <div className={styles.itemLayout}>
+        <div className={styles.content} onClick={() => {
+          onModal(note.id)
+        }}>
+          <p className={styles.text}>{note.title}</p>
+        </div>
+
+        <div className={styles.footer}>
+          <div className={styles.meta}>
+            <span className={styles.date}>📅 {formattedDate}</span>
+            {/* {note.updatedAt && <span className={styles.device}>📱 {new Date(note.updatedAt).toLocaleString()}</span>} */}
+          </div>
+
+          <div className={styles.actions}>
+            <button
+              className={`${styles.iconBtn} ${styles.editBtn}`}
+              onClick={(e) => {
+                setIsEditing(true);
+              }}
+              title="Редактировать"
+            >
+              ✏️
+            </button>
+            <button
+              className={`${styles.iconBtn} ${styles.deleteBtn}`}
+              onClick={(e) => {
+                handleDelete()
+              }}
+              title="Удалить"
+            >
+              🗑️
+            </button>
+          </div>
+
+
         </div>
       </div>
-      <div>
-        <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
-          ✏️ Редактировать
-        </Button>
-        <Button variant="danger" size="sm" onClick={handleDelete} disabled={false}>
-          🗑️ Удалить
-        </Button>
-      </div>
+
 
     </Card>
   );
