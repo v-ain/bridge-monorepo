@@ -5,6 +5,7 @@ import { AppErrorCode, NoteEntity } from '@bridge-monorepo/shared';
 import styles from './NoteItem.module.scss';
 import { useNoteStore } from '@/store/useNoteStore';
 import { NoteEditForm } from './NoteEditForm';
+import { IconButton } from '../ui/icon-button/IconButton';
 
 interface NoteItemProps {
   note: NoteEntity;
@@ -67,24 +68,12 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
           </div>
 
           <div className={styles.actions}>
-            <button
-              className={`${styles.iconBtn} ${styles.editBtn}`}
-              onClick={(e) => {
-                setIsEditing(true);
-              }}
-              title="Редактировать"
-            >
+            <IconButton onClick={() => setIsEditing(true)} title="Редактировать">
               ✏️
-            </button>
-            <button
-              className={`${styles.iconBtn} ${styles.deleteBtn}`}
-              onClick={(e) => {
-                handleDelete()
-              }}
-              title="Удалить"
-            >
+            </IconButton>
+            <IconButton variant="danger" onClick={handleDelete} title="Удалить">
               🗑️
-            </button>
+            </IconButton>
           </div>
 
 

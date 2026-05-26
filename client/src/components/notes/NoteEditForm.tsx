@@ -5,6 +5,7 @@ import { NoteInputSchema, NOTE_MAX_LENGTH, AppErrorCode } from '@bridge-monorepo
 import { parseZodError } from '@/utils/parseZodError';
 import { getErrorMessage } from '@/utils/errorMessages';
 import styles from './NoteItem.module.scss';
+import { IconButton } from '../ui/icon-button/IconButton';
 
 interface NoteEditFormProps {
   initialValue: string;
@@ -76,17 +77,21 @@ export const NoteEditForm = ({ initialValue, onSave, onCancel }: NoteEditFormPro
       </div>
 
       <div className={styles.editActions}>
-        <Button size="sm" variant="secondary" onClick={onCancel} disabled={isSubmitting}>
-          Отмена
-        </Button>
-        <Button
-          size="sm"
-          variant="primary"
+        <IconButton
           onClick={handleFormSubmit}
           disabled={isSubmitting || isOverLimit}
+          title="Сохранить изменения"
         >
-          {isSubmitting ? 'Сохранение...' : 'Сохранить'}
-        </Button>
+          ✅
+        </IconButton>
+        <IconButton
+          variant="danger"
+          onClick={onCancel}
+          disabled={isSubmitting}
+          title="Отменить редактирование"
+        >
+          ❌
+        </IconButton>
       </div>
     </Card>
   );

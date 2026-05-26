@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
  * @typedef {import('@bridge-monorepo/shared').NoteEntity} NoteEntity
  */
 
-const MAX_PREVIEW_LENGTH = 30;
+const MAX_PREVIEW_LENGTH = 130;
 
 /**
  * Внутренняя функция для подготовки заголовка и тела
