@@ -1,10 +1,14 @@
 import { handleAuth } from './handlers/auth.js';
+import { BlogController } from './src/controllers/BlogController.js';
 import { NoteController } from './src/controllers/NoteControllers.js';
+import { BlogService } from './src/services/BlogService.js';
 import { NoteService } from './src/services/NoteService.js';
 
 const noteService = new NoteService();
 const noteController = new NoteController(noteService);
 
+const blogService = new BlogService();
+const blogContoller = new BlogController(blogService);
 
 // ========== СТАТИЧЕСКИЕ МАРШРУТЫ ==========
 const routes = {
@@ -24,6 +28,7 @@ const routes = {
   'POST /auth': handleAuth,
   'POST /api/notes': noteController.createNoteHandler,
   'GET /api/notes': noteController.getAllNotesHandler,
+  'GET /blog': blogContoller.getBlogData,
 };
 
 // ========== ДИНАМИЧЕСКИЕ МАРШРУТЫ (пока пустые) ==========
