@@ -51,6 +51,8 @@ export { z } from 'zod';
 export type { ZodError } from 'zod';
 export * from './schemas/note.schema.js';
 
+export * from './schemas/blog.schema.js';
+
 export type AppErrorCode =
 
   | 'NOTE_EMPTY'
