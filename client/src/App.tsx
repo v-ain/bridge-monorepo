@@ -1,7 +1,7 @@
 import './styles/global.scss';
 
 import { Layout } from './components/Layout/Layout';
-import { NoteForm, NoteList } from './components/notes';
+import { NoteForm, NoteList } from './pages/notes';
 
 function App() {
   return (
