@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import styles from './NoteForm.module.scss';
-import { useNoteStore } from './store/useNoteStore';
+import { useNoteStore } from '../store/useNoteStore';
 import { NoteInputSchema, NOTE_MAX_LENGTH, AppErrorCode } from '@bridge-monorepo/shared';
-import { parseZodError } from '../../utils/parseZodError'; // проверь путь до утилит
-import { getErrorMessage } from '../../utils/errorMessages'; // проверь путь до утилит
+import { parseZodError } from '@/utils/parseZodError'; // проверь путь до утилит
+import { getErrorMessage } from '@/utils/errorMessages'; // проверь путь до утилит
 
 export const NoteForm = () => {
   const addNote = useNoteStore((state) => state.addNote);

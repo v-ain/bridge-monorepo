@@ -5,7 +5,7 @@ import { ErrorMessage } from '@/components/ErrorMessage';
 import styles from './NoteList.module.scss';
 import { NoteDetail } from './NoteDetail';
 import Modal from '@/components/modal/Modal';
-import { useNoteStore } from './store/useNoteStore';
+import { useNoteStore } from '../store/useNoteStore';
 import { getErrorMessage } from '@/utils/errorMessages';
 
 export const NoteList = () => {
