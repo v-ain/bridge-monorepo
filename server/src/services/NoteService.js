@@ -75,6 +75,7 @@ export class NoteService {
   /** @returns {Promise<NoteEntity[]>} */
   async getAll() {
     await this._loadData();
+    // TODO: Возвращать глубокую копию через structuredClone(), чтобы избежать мутации данных по ссылке снаружи
     return this._notes;
   }
 
