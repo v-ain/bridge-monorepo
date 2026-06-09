@@ -1,6 +1,6 @@
 import { readFile, writeFile, rename } from 'node:fs/promises';
-import { fileURLToPath } from 'url';
 import { createNoteEntity, updateNoteEntity } from './note.mappers.js';
+import path from 'node:path';
 
 /**
  * @typedef {import('@bridge-monorepo/shared').NoteEntity} NoteEntity
@@ -9,8 +9,12 @@ import { createNoteEntity, updateNoteEntity } from './note.mappers.js';
  * @typedef {import('@bridge-monorepo/shared').INoteService} INoteService
  */
 
-const NOTES_PATH = fileURLToPath(new URL('../../data/notes_v2.json', import.meta.url));
 
+// Берем путь из .env, либо откатываемся на дефолтный относительный путь
+const envPath = process.env.NOTES_PATH || '../../data/dev_notes_v2.json';
+
+// Склеиваем абсолютный путь от корня запуска сервера
+const NOTES_PATH = path.resolve(process.cwd(), envPath);
 /**
  * @implements {INoteService}
  */
