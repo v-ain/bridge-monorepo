@@ -1,5 +1,5 @@
 import styles from './NoteDetail.module.scss';
-import { useNoteStore } from '@/store/useNoteStore';
+import { useNoteStore } from '../store/useNoteStore';
 
 interface NoteDetailProps {
   noteId: string;

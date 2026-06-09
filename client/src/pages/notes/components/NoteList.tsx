@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { NoteItem } from './NoteItem';
-import { LoadingSpinner } from '../LoadingSpinner';
-import { ErrorMessage } from '../ErrorMessage';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ErrorMessage } from '@/components/ErrorMessage';
 import styles from './NoteList.module.scss';
 import { NoteDetail } from './NoteDetail';
-import Modal from '../modal/Modal';
-import { useNoteStore } from '@/store/useNoteStore';
+import Modal from '@/components/modal/Modal';
+import { useNoteStore } from '../store/useNoteStore';
 import { getErrorMessage } from '@/utils/errorMessages';
 
 export const NoteList = () => {

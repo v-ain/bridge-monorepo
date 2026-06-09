@@ -1,8 +1,6 @@
-// server/cors.js
-const CORS_ORIGIN = process.env.NODE_ENV === 'production'
-  ? 'https://yourdomain.com'
-  : 'http://192.168.0.101:3001';
+const ALLOWED_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3001';
 
+export const CORS_ORIGIN = ALLOWED_ORIGIN;
 /**
  * Устанавливает CORS заголовки
  * @param {import('http').ServerResponse} res

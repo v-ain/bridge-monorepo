@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Button } from '../ui/Button';
-import { Card } from '../ui/Card';
+import { Card } from '@/components/ui/Card';
 import { NoteInputSchema, NOTE_MAX_LENGTH, AppErrorCode } from '@bridge-monorepo/shared';
 import { parseZodError } from '@/utils/parseZodError';
 import { getErrorMessage } from '@/utils/errorMessages';
 import styles from './NoteItem.module.scss';
-import { IconButton } from '../ui/icon-button/IconButton';
+import { IconButton } from '@/components/ui/icon-button/IconButton';
 
 interface NoteEditFormProps {
   initialValue: string;

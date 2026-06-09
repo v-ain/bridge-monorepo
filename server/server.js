@@ -1,12 +1,8 @@
 import http from 'http';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { setCorsHeaders, handlePreflight } from './cors.js';
 import { setSecurityHeaders, handlePrefetch } from './security.js';
 import { findRoute } from './routes.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const DEBUG = process.env.DEBUG === 'true';
 
@@ -50,7 +46,8 @@ const server = http.createServer(async (req, res) => {
   res.end('404: Not Found');
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(3000, '0.0.0.0', () => {
-  console.log('\x1b[32m%s\x1b[0m', `🛡️  Spectre-Safe Server started on port ${PORT}`);
+const PORT = Number(process.env.PORT) || 3000;
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log('\x1b[32m%s\x1b[0m', `Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });

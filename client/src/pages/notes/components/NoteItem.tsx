@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from '../ui/Button';
-import { Card } from '../ui/Card';
+import { Card } from '@/components/ui/Card';
 import { AppErrorCode, NoteEntity } from '@bridge-monorepo/shared';
 import styles from './NoteItem.module.scss';
-import { useNoteStore } from '@/store/useNoteStore';
+import { useNoteStore } from '../store/useNoteStore';
 import { NoteEditForm } from './NoteEditForm';
-import { IconButton } from '../ui/icon-button/IconButton';
+import { IconButton } from '@/components/ui/icon-button/IconButton';
 
 interface NoteItemProps {
   note: NoteEntity;
