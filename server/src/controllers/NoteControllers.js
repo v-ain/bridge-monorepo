@@ -4,14 +4,12 @@
 
 import { NoteInputSchema, z } from '@bridge-monorepo/shared';
 
-
 export class NoteController {
   /** @param {INoteService} noteService */
   constructor(noteService) {
     /** @type {INoteService} */
     this.noteService = noteService;
   }
-
 
   /**
    * GET /api/notes
@@ -27,7 +25,7 @@ export class NoteController {
       // Перенаправляем в единый центр — он сам залогирует и отдаст 500
       return this._handleSystemError(res, err, null, '[GET /api/notes]');
     }
-  }
+  };
 
   /**
    * GET /api/notes:id
@@ -44,12 +42,10 @@ export class NoteController {
       }
 
       return this._sendResponse(res, 200, note, null);
-
     } catch (err) {
       return this._handleSystemError(res, err, null, `[GET /api/notes/${id}]`);
     }
-  }
-
+  };
 
   /**
    * POST /api/notes
@@ -82,17 +78,15 @@ export class NoteController {
       createdNoteId = newNote.id;
 
       return this._sendResponse(res, 201, newNote, null);
-
     } catch (error) {
       // Все остальные системные ошибки отправляем в наш новый обработчик
       return this._handleSystemError(res, error, req, '[POST /api/notes]');
-
     } finally {
       // Выполнится в любом случае (и в случае успеха, и после ошибки)
       const time = new Date().toLocaleTimeString();
       console.log(`[${time}] Note [${createdNoteId}] processed (${requestSize} bytes)`);
     }
-  }
+  };
 
   /**
    * PATCH /api/notes/:id
@@ -104,7 +98,6 @@ export class NoteController {
     let requestSize = 0;
 
     try {
-
       const { data, size } = await this._parseRequestBody(req);
       requestSize = size;
 
@@ -128,18 +121,15 @@ export class NoteController {
       }
 
       return this._sendResponse(res, 200, updatedNote, null);
-
     } catch (error) {
       // Все остальные системные сбои (JSON, Payload, 500) отправляем в центральный обработчик
       return this._handleSystemError(res, error, null, `[PATCH /api/notes/${id}]`);
-
     } finally {
       // Лог сработает ВСЕГДА и зафиксирует реальный размер обработанных байт
       const time = new Date().toLocaleTimeString();
       console.log(`[${time}] Note [${id}] UPDATED (${requestSize} bytes)`);
     }
-  }
-
+  };
 
   /**
    * DELETE /api/notes/:id
@@ -157,16 +147,12 @@ export class NoteController {
 
       // Успешное удаление. Обычно возвращают либо { id }, либо статус 204 No Content.
       return this._sendResponse(res, 200, result, null);
-
     } catch (error) {
-
       return this._handleSystemError(res, error, null, `[DELETE /api/notes/${id}]`);
-
     } finally {
       console.log(`[${new Date().toLocaleTimeString()}] Note [${id}] DELETED`);
     }
-  }
-
+  };
 
   _parseRequestBody = (req) => {
     const MAX_BODY_SIZE = 1024 * 1024;
@@ -200,7 +186,7 @@ export class NoteController {
         } catch (e) {
           reject(new Error('Invalid JSON format'));
         } finally {
-          rawBody.fill(0)
+          rawBody.fill(0);
         }
       });
 
@@ -211,7 +197,7 @@ export class NoteController {
   /**
    * Универсальный метод отправки ответа.
    * Строго следует контракту ApiResponse<T> из shared.
-   * 
+   *
    * @template T
    * @param {import('node:http').ServerResponse} res
    * @param {number} status - HTTP статус (201, 200, 400, 413, 500)
@@ -221,9 +207,7 @@ export class NoteController {
    */
   _sendResponse(res, status, data, error, req = null) {
     /** @type {import('@bridge-monorepo/shared').ApiResponse<T>} */
-    const response = error
-      ? { data: null, error: error }
-      : { data: /** @type {T} */ (data), error: null };
+    const response = error ? { data: null, error: error } : { data: /** @type {T} */ (data), error: null };
 
     res.writeHead(status, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(response));
@@ -236,7 +220,7 @@ export class NoteController {
   /**
    * Централизованный обработчик старых текстовых ошибок для блоков catch.
    * Принимает сырую ошибку и мапит её на строгие коды AppErrorCode.
-   * 
+   *
    * @param {import('node:http').ServerResponse} res
    * @param {any} error
    * @param {import('node:http').IncomingMessage | null} req

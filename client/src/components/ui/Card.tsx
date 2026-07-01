@@ -8,9 +8,5 @@ interface CardProps {
 }
 
 export const Card = ({ children, className = '', hover = false }: CardProps) => {
-  return (
-    <div className={`${styles.card} ${hover ? styles.hover : ''} ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${styles.card} ${hover ? styles.hover : ''} ${className}`}>{children}</div>;
 };

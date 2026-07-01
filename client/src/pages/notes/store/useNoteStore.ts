@@ -43,13 +43,13 @@ export const useNoteStore = create<NoteState>((set) => ({
 
     if (response.error) {
       set({ isLoading: false }); // Снимаем флаг загрузки
-      return response.error;     // Возвращаем код ошибки форме
+      return response.error; // Возвращаем код ошибки форме
     }
 
     // Иммутабельно добавляем новую заметку в конец списка
     set((state) => ({
       notes: [...state.notes, response.data],
-      isLoading: false
+      isLoading: false,
     }));
 
     return null;
@@ -91,4 +91,3 @@ export const useNoteStore = create<NoteState>((set) => ({
     return null;
   },
 }));
-

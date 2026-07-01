@@ -42,21 +42,19 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
 
   if (isEditing) {
     return (
-      <NoteEditForm
-        initialValue={note.body || note.title}
-        onSave={handleSave}
-        onCancel={() => setIsEditing(false)}
-      />
+      <NoteEditForm initialValue={note.body || note.title} onSave={handleSave} onCancel={() => setIsEditing(false)} />
     );
   }
 
-
   return (
-    <Card hover >
+    <Card hover>
       <div className={styles.itemLayout}>
-        <div className={styles.content} onClick={() => {
-          onModal(note.id)
-        }}>
+        <div
+          className={styles.content}
+          onClick={() => {
+            onModal(note.id);
+          }}
+        >
           <p className={styles.text}>{note.title}</p>
         </div>
 
@@ -74,12 +72,8 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
               🗑️
             </IconButton>
           </div>
-
-
         </div>
       </div>
-
-
     </Card>
   );
 };

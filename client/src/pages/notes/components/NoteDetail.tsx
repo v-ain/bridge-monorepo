@@ -27,7 +27,6 @@ export const NoteDetail = ({ noteId }: NoteDetailProps) => {
       <div className={styles.meta}>
         <span>📅 {new Date(note.createdAt).toLocaleString()}</span>
       </div>
-
     </div>
   );
 };

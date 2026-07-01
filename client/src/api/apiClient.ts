@@ -32,7 +32,6 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
       // Сюда мы попадем, если сервер упал настолько жестко, что выдал не JSON, а битый текст/HTML
       return { data: null, error: 'INTERNAL_SERVER_ERROR' };
     }
-
   } catch (error: any) {
     // 3. Перехват критических сетевых аварий (у пользователя пропал Wi-Fi, DNS не разрешился и т.д.)
     console.error(`[API Network/System Error] ${endpoint}:`, error.message);
@@ -48,17 +47,20 @@ export const notesApi = {
 
   getById: (id: string) => apiRequest<NoteEntity>(`/notes/${id}`),
 
-  create: (title: string) => apiRequest<NoteEntity>('/notes', {
-    method: 'POST',
-    body: JSON.stringify({ title })
-  }),
+  create: (title: string) =>
+    apiRequest<NoteEntity>('/notes', {
+      method: 'POST',
+      body: JSON.stringify({ title }),
+    }),
 
-  update: (id: string, title: string) => apiRequest<NoteEntity>(`/notes/${id}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ title })
-  }),
+  update: (id: string, title: string) =>
+    apiRequest<NoteEntity>(`/notes/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ title }),
+    }),
 
-  delete: (id: string) => apiRequest<{ id: string }>(`/notes/${id}`, {
-    method: 'DELETE'
-  }),
+  delete: (id: string) =>
+    apiRequest<{ id: string }>(`/notes/${id}`, {
+      method: 'DELETE',
+    }),
 };

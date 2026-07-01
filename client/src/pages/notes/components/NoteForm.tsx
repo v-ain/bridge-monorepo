@@ -68,22 +68,12 @@ export const NoteForm = () => {
         </span>
 
         {/* Вывод ошибки на русском языке */}
-        {errorKey && (
-          <span className={styles.errorMessage}>
-            ⚠️ {getErrorMessage(errorKey)}
-          </span>
-        )}
+        {errorKey && <span className={styles.errorMessage}>⚠️ {getErrorMessage(errorKey)}</span>}
       </div>
 
-      <Button
-        type="submit"
-        variant="primary"
-        disabled={isButtonDisabled}
-        loading={isLoading || isSubmitting}
-      >
+      <Button type="submit" variant="primary" disabled={isButtonDisabled} loading={isLoading || isSubmitting}>
         {isLoading || isSubmitting ? 'Сохранение...' : 'Создать заметку'}
       </Button>
     </form>
   );
 };
-

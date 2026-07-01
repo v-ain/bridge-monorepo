@@ -8,8 +8,8 @@ export class BlogController {
    * @param {import('http').ServerResponse} res
    */
   getBlogData = async (req, res) => {
-    const posts = await this.blogService.getRemoteMarkdown()
+    const posts = await this.blogService.getRemoteMarkdown();
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(posts));
-  }
+  };
 }

@@ -37,10 +37,7 @@ export default {
             cacheDirectory: true,
           },
         },
-        include: [
-          path.resolve(__dirname, 'src'),
-          path.resolve(__dirname, '../shared'),
-        ],
+        include: [path.resolve(__dirname, 'src'), path.resolve(__dirname, '../shared')],
       },
       {
         test: /\.module\.scss$/,
@@ -50,9 +47,7 @@ export default {
             loader: 'css-loader',
             options: {
               modules: {
-                localIdentName: isProduction
-                  ? '[hash:base64:5]'
-                  : '[name]__[local]__[hash:base64:5]',
+                localIdentName: isProduction ? '[hash:base64:5]' : '[name]__[local]__[hash:base64:5]',
                 exportLocalsConvention: 'camelCaseOnly',
                 exportOnlyLocals: false,
                 namedExport: false,
@@ -65,11 +60,7 @@ export default {
       {
         test: /\.scss$/,
         exclude: /\.module\.scss$/,
-        use: [
-          isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
-          'css-loader',
-          'sass-loader',
-        ],
+        use: [isProduction ? MiniCssExtractPlugin.loader : 'style-loader', 'css-loader', 'sass-loader'],
       },
     ],
   },
@@ -78,9 +69,13 @@ export default {
     new HtmlWebpackPlugin({
       template: './public/index.html',
     }),
-    ...(isProduction ? [new MiniCssExtractPlugin({
-      filename: '[name].[contenthash].css',
-    })] : []),
+    ...(isProduction
+      ? [
+          new MiniCssExtractPlugin({
+            filename: '[name].[contenthash].css',
+          }),
+        ]
+      : []),
   ],
 
   devServer: {

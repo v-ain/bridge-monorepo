@@ -5,7 +5,7 @@ const EXPECTED_HASH = crypto.scryptSync('твой_секрет_2026', 'static_sa
 export const handleAuth = (req, res) => {
   let bodyChunks = [];
 
-  req.on('data', chunk => bodyChunks.push(chunk));
+  req.on('data', (chunk) => bodyChunks.push(chunk));
   req.on('end', () => {
     const rawBody = Buffer.concat(bodyChunks);
     try {

@@ -1,5 +1,5 @@
-import { Layout } from "@/components/Layout/Layout";
-import { NoteForm, NoteList } from "./components";
+import { Layout } from '@/components/Layout/Layout';
+import { NoteForm, NoteList } from './components';
 
 export const AppNotes = () => {
   return (
@@ -12,7 +12,7 @@ export const AppNotes = () => {
         <NoteForm />
         <NoteList />
       </div>
-      <div id='modal-root' />
+      <div id="modal-root" />
     </Layout>
   );
-}
+};

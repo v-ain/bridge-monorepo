@@ -1,6 +1,5 @@
 import { AppErrorCode } from '@bridge-monorepo/shared';
 
-
 /**
  * Словарь человекочитаемых сообщений об ошибках на русском языке.
  * Жестко завязан на AppErrorCode из shared.

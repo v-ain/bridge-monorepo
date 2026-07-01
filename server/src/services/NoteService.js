@@ -4,11 +4,10 @@ import path from 'node:path';
 
 /**
  * @typedef {import('@bridge-monorepo/shared').NoteEntity} NoteEntity
- * @typedef {import('@bridge-monorepo/shared').CreateNoteDto} CreateNoteDto 
- * @typedef {import('@bridge-monorepo/shared').DeleteNoteResponse} DeleteNoteResponse 
+ * @typedef {import('@bridge-monorepo/shared').CreateNoteDto} CreateNoteDto
+ * @typedef {import('@bridge-monorepo/shared').DeleteNoteResponse} DeleteNoteResponse
  * @typedef {import('@bridge-monorepo/shared').INoteService} INoteService
  */
-
 
 // Берем путь из .env, либо откатываемся на дефолтный относительный путь
 const envPath = process.env.NOTES_PATH || '../../data/dev_notes_v2.json';
@@ -66,7 +65,7 @@ export class NoteService {
         this._notes = nextNotes;
         this._isLoaded = true;
       } catch (err) {
-        // В случае ошибки сбрасываем флаг, чтобы при следующем запросе 
+        // В случае ошибки сбрасываем флаг, чтобы при следующем запросе
         // данные были перечитаны с диска
         this._isLoaded = false;
         throw err;
@@ -88,11 +87,10 @@ export class NoteService {
    * @returns {Promise<NoteEntity| null>}
    */
   async create(title) {
-
     await this._loadData();
 
     /** @type {NoteEntity} */
-    const newNote = createNoteEntity(title)
+    const newNote = createNoteEntity(title);
 
     await this._sync([...this._notes, newNote]);
     return newNote;
@@ -105,13 +103,13 @@ export class NoteService {
   async getById(id) {
     await this._loadData();
 
-    const note = this._notes.find(n => n.id === id);
+    const note = this._notes.find((n) => n.id === id);
 
     // 3. Если не нашли — возвращаем null (контроллер потом ответит 404)
     if (!note) return null;
 
     // 4. Возвращаем заметку (здесь можно смапить в DTO, если нужно)
-    return note
+    return note;
   }
 
   /**
@@ -125,7 +123,7 @@ export class NoteService {
     let updatedNote = null;
 
     // Создаем новый массив с измененной заметкой (иммутабельно)
-    const nextNotes = this._notes.map(note => {
+    const nextNotes = this._notes.map((note) => {
       if (note.id === id) {
         // Используем наш маппер вместо ручного обновления
         updatedNote = updateNoteEntity(note, title);
@@ -152,9 +150,9 @@ export class NoteService {
     // 1. Загружаем данные в кеш
     await this._loadData();
 
-    // 2. Ищем индекс за ОДИН проход. 
+    // 2. Ищем индекс за ОДИН проход.
     // Метод остановится сразу, как только найдет совпадение.
-    const index = this._notes.findIndex(note => note.id === id);
+    const index = this._notes.findIndex((note) => note.id === id);
 
     // Если индекс -1, значит заметки нет. Выходим мгновенно.
     if (index === -1) {
@@ -164,10 +162,7 @@ export class NoteService {
     // 3. Создаем новый массив БЕЗ этой заметки (иммутабельно)
     // Используем slice: копируем всё ДО индекса и всё ПОСЛЕ индекса.
     // Это работает быстрее, чем .filter(), так как V8 точно знает границы копирования.
-    const nextNotes = [
-      ...this._notes.slice(0, index),
-      ...this._notes.slice(index + 1)
-    ];
+    const nextNotes = [...this._notes.slice(0, index), ...this._notes.slice(index + 1)];
 
     // 4. Синхронизируем с диском только измененные данные
     await this._sync(nextNotes);
