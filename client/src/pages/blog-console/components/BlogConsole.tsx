@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BlogApiResponse, } from '@bridge-monorepo/shared';
+import { BlogApiResponse } from '@bridge-monorepo/shared';
 import styles from './BlogConsole.module.scss';
 import { fetchBlogArticles } from './fethBlogTitle';
 import { CardDescription } from './CardDescription';
@@ -79,7 +79,9 @@ export const BlogConsole: React.FC = () => {
           </div>
           <div className={styles.formFooter}>
             <span>Local Sync Enabled</span>
-            <button type="submit" className={styles.submitBtn}><span>▶ Run Execute</span></button>
+            <button type="submit" className={styles.submitBtn}>
+              <span>▶ Run Execute</span>
+            </button>
           </div>
         </section>
 
@@ -100,7 +102,7 @@ export const BlogConsole: React.FC = () => {
               </div>
             ) : (
               casesList.map(({ title: folderName }) => (
-                (<div
+                <div
                   key={folderName}
                   // Если папка выбрана — подсвечиваем её бордер стилями
                   className={`${styles.consoleItem} ${selectedCase === folderName ? styles.activeItem : ''}`}
@@ -108,15 +110,23 @@ export const BlogConsole: React.FC = () => {
                   style={selectedCase === folderName ? { borderColor: '#eab308', backgroundColor: '#222' } : {}}
                 >
                   <div className={styles.itemLeft}>
-                    <span className={styles.terminalPrompt} style={selectedCase === folderName ? { color: '#eab308' } : {}}>$&gt;</span>
-                    <p className={styles.itemText} style={selectedCase === folderName ? { color: '#fff', fontWeight: 'bold' } : {}}>
+                    <span
+                      className={styles.terminalPrompt}
+                      style={selectedCase === folderName ? { color: '#eab308' } : {}}
+                    >
+                      $&gt;
+                    </span>
+                    <p
+                      className={styles.itemText}
+                      style={selectedCase === folderName ? { color: '#fff', fontWeight: 'bold' } : {}}
+                    >
                       {folderName}
                     </p>
                   </div>
                   <div className={styles.itemRight}>
                     <span className={styles.time}>Fetch Active</span>
                   </div>
-                </div>)
+                </div>
               ))
             )}
           </div>
@@ -127,16 +137,33 @@ export const BlogConsole: React.FC = () => {
       <div className={styles.mainContent} style={{ paddingTop: 0 }}>
         <section className={styles.detailedWorkspace}>
           <div className={styles.tabBar}>
-            <button className={`${styles.tab} ${activeTab === 'description' ? styles.active : ''}`} onClick={() => setActiveTab('description')}>📝 Description</button>
-            <button className={`${styles.tab} ${activeTab === 'json' ? styles.active : ''}`} onClick={() => setActiveTab('json')}>💻 Raw JSON Payload</button>
-            <button className={`${styles.tab} ${activeTab === 'telemetry' ? styles.active : ''}`} onClick={() => setActiveTab('telemetry')}>📈 Telemetry Metrics</button>
+            <button
+              className={`${styles.tab} ${activeTab === 'description' ? styles.active : ''}`}
+              onClick={() => setActiveTab('description')}
+            >
+              📝 Description
+            </button>
+            <button
+              className={`${styles.tab} ${activeTab === 'json' ? styles.active : ''}`}
+              onClick={() => setActiveTab('json')}
+            >
+              💻 Raw JSON Payload
+            </button>
+            <button
+              className={`${styles.tab} ${activeTab === 'telemetry' ? styles.active : ''}`}
+              onClick={() => setActiveTab('telemetry')}
+            >
+              📈 Telemetry Metrics
+            </button>
           </div>
 
           <div className={styles.viewerWindow}>
             <div className={styles.metaGrid}>
               <div className={styles.metaCard}>
                 <div className={styles.metaLabel}>Resource Slug</div>
-                <div className={styles.metaValue} style={{ fontSize: '0.7rem' }}>{selectedCase || 'NULL'}</div>
+                <div className={styles.metaValue} style={{ fontSize: '0.7rem' }}>
+                  {selectedCase || 'NULL'}
+                </div>
               </div>
               <div className={styles.metaCard}>
                 <div className={styles.metaLabel}>Domain Context</div>
@@ -150,7 +177,9 @@ export const BlogConsole: React.FC = () => {
               </div>
               <div className={styles.metaCard}>
                 <div className={styles.metaLabel}>Stream Sync</div>
-                <div className={styles.metaValue} style={{ color: '#10b981' }}>● Live Stream</div>
+                <div className={styles.metaValue} style={{ color: '#10b981' }}>
+                  ● Live Stream
+                </div>
               </div>
             </div>
 

@@ -23,14 +23,14 @@ function parseJournalIssues(markdownText) {
 
       if (linkMatch) {
         const titleText = linkMatch[1]; // "Issue #1: Bitwise State..."
-        const path = linkMatch[2];      // "./cases/01-bitmasks-branch-prediction/"
+        const path = linkMatch[2]; // "./cases/01-bitmasks-branch-prediction/"
         const cleanTitle = titleText.replace(/^Issue\s+#\d+:\s*/i, '');
         currentIssue = {
           title: cleanTitle,
           path: path,
           topic: '',
           result: '',
-          keyInsights: ''
+          keyInsights: '',
         };
       }
       continue;
@@ -41,18 +41,15 @@ function parseJournalIssues(markdownText) {
 
     // 2. Парсим свойства внутри элементов списка
     if (line.startsWith('*')) {
-
       // Убираем маркер списка "*" и лишние пробелы в начале
       // const content = line.replace(/^[\*\-\s]+/, '');
       const content = line;
       if (content.startsWith('*   **Topic:**')) {
         currentIssue.topic = content.replace('*   **Topic:**', '').trim();
-      }
-      else if (content.startsWith('*   **Result:**')) {
+      } else if (content.startsWith('*   **Result:**')) {
         // Очищаем от Markdown жирности (**) внутри строки результата
         currentIssue.result = content.replace('*   **Result:**', '').replace(/\*\*/g, '').trim();
-      }
-      else if (content.startsWith('*   **Key Insights:**')) {
+      } else if (content.startsWith('*   **Key Insights:**')) {
         currentIssue.keyInsights = content.replace('*   **Key Insights:**', '').trim();
       }
     }
@@ -72,12 +69,11 @@ export let getFileString = async () => {
   const rawText = await fs.readFile(pathFileMd, 'utf-8');
   let rawParsedObjects = parseJournalIssues(rawText);
 
-
   // Безопасная валидация
   const validation = BlogApiResponseSchema.safeParse(rawParsedObjects);
 
   if (!validation.success) {
-    // Если разметка сломалась, мы не ломаем сервер, а логируем ошибку Zod 
+    // Если разметка сломалась, мы не ломаем сервер, а логируем ошибку Zod
     // и можем либо выкинуть контролируемый ApiResponse err, либо вернуть то, что удалось спасти
     console.error('⚠️ Ошибка валидации Markdown структуры:', validation.error.format());
 
@@ -87,7 +83,7 @@ export let getFileString = async () => {
 
   // Здесь лежат 100% валидные данные, полностью соответствующие вашим TS типам
   return validation.data;
-}
+};
 
 export class BlogService {
   constructor() {
@@ -98,8 +94,8 @@ export class BlogService {
     try {
       const response = await fetch(this.githubRawUrl, {
         headers: {
-          'User-Agent': 'NodeJS-Minimal-Blog-Console'
-        }
+          'User-Agent': 'NodeJS-Minimal-Blog-Console',
+        },
       });
 
       // Обрабатываем HTTP ошибки (404, 500 и т.д.)
@@ -111,7 +107,6 @@ export class BlogService {
 
       let rawParsedObjects = parseJournalIssues(markdownText);
       return rawParsedObjects;
-
     } catch (error) {
       // Выводим ошибку в консоль сервера для отладки
       console.error('Ошибка при получении блога с GitHub:', error.message);

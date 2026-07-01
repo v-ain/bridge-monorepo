@@ -1,4 +1,3 @@
-
 import { useState, useLayoutEffect } from 'react';
 
 export const usePortal = (wrapperId: string = 'modal-root') => {

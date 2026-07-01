@@ -19,7 +19,7 @@ export function MainWelcomeScreen() {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    // ДИНАМИЧЕСКИЙ РАСЧЕТ: если экран меньше 768px (мобилка), 
+    // ДИНАМИЧЕСКИЙ РАСЧЕТ: если экран меньше 768px (мобилка),
     // уменьшаем количество точек в два раза, чтобы они не толпились
     const isMobile = width < 768;
     const numPoints = isMobile ? 20 : 45;
@@ -68,10 +68,16 @@ export function MainWelcomeScreen() {
       ctx.lineWidth = 1.0;
 
       for (let x = 0; x < width; x += gridSize) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
       }
       for (let y = 0; y < height; y += gridSize) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
       }
 
       // 2. СВЯЗИ МЕЖДУ ТОЧКАМИ
@@ -131,61 +137,71 @@ export function MainWelcomeScreen() {
     };
   }, []);
   return (
-    <div style={{
-      backgroundColor: '#0a0a0b',
-      color: '#ededed',
-      minHeight: '100vh',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      padding: '40px 20px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
+    <div
+      style={{
+        backgroundColor: '#0a0a0b',
+        color: '#ededed',
+        minHeight: '100vh',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        padding: '40px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
       {/* CANVAS С НЕЙРОСЕТЬЮ НА ЗАДНЕМ ПЛАНЕ */}
-      <canvas ref={canvasRef} style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        zIndex: 1
-      }} />
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 1,
+        }}
+      />
 
       {/* КОНТЕНТ (ПОВЕРХ CANVAS, Z-INDEX: 2) */}
       <div style={{ zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-
         {/* ВЕРХНЯЯ ПАНЕЛЬ */}
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          left: '20px',
-          right: '20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          fontSize: '13px',
-          color: '#555',
-          letterSpacing: '0.5px',
-          fontFamily: 'monospace'
-        }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            right: '20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            fontSize: '13px',
+            color: '#555',
+            letterSpacing: '0.5px',
+            fontFamily: 'monospace',
+          }}
+        >
           <div>BRIDGE_MONOREPO // SYSTEM_HUB</div>
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <span style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              color: isServerOnline ? '#4ade80' : '#f87171'
-            }}>
-              <span style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: isServerOnline ? '#4ade80' : '#f87171',
-                display: 'inline-block'
-              }} />
+            <span
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: isServerOnline ? '#4ade80' : '#f87171',
+              }}
+            >
+              <span
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: isServerOnline ? '#4ade80' : '#f87171',
+                  display: 'inline-block',
+                }}
+              />
               {isServerOnline ? 'API: Connected' : 'API: Offline'}
             </span>
             <span>v2.0.0-solid</span>
@@ -203,14 +219,16 @@ export function MainWelcomeScreen() {
         </div>
 
         {/* КАРТОЧКИ */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '24px',
-          width: '100%',
-          maxWidth: '760px',
-          marginBottom: '60px'
-        }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '24px',
+            width: '100%',
+            maxWidth: '760px',
+            marginBottom: '60px',
+          }}
+        >
           {apps.map((app) => {
             const isGithub = app.id === 'github';
             const [isHovered, setIsHovered] = useState(false);
@@ -225,27 +243,36 @@ export function MainWelcomeScreen() {
                   backgroundColor: '#131314',
                   color: '#ededed',
                   border: '1px solid',
-                  borderColor: isHovered
-                    ? (isGithub ? '#ff9f1c' : '#ffffff')
-                    : '#222223',
+                  borderColor: isHovered ? (isGithub ? '#ff9f1c' : '#ffffff') : '#222223',
                   borderRadius: '14px',
                   padding: '32px',
                   cursor: 'pointer',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
                   boxShadow: isHovered
-                    ? (isGithub ? '0 10px 40px rgba(255,159,28,0.06)' : '0 10px 40px rgba(255,255,255,0.04)')
-                    : 'none'
+                    ? isGithub
+                      ? '0 10px 40px rgba(255,159,28,0.06)'
+                      : '0 10px 40px rgba(255,255,255,0.04)'
+                    : 'none',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: '16px',
+                  }}
+                >
                   <h3 style={{ margin: 0, fontSize: '21px', fontWeight: 600 }}>{app.title}</h3>
-                  <span style={{
-                    fontSize: '11px',
-                    fontFamily: 'monospace',
-                    color: isHovered ? (isGithub ? '#ff9f1c' : '#ffffff') : '#555',
-                    transition: 'color 0.3s'
-                  }}>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontFamily: 'monospace',
+                      color: isHovered ? (isGithub ? '#ff9f1c' : '#ffffff') : '#555',
+                      transition: 'color 0.3s',
+                    }}
+                  >
                     {isGithub ? '[SYS_CONSOLE]' : '[B2B_MODULE]'}
                   </span>
                 </div>
@@ -267,7 +294,7 @@ export function MainWelcomeScreen() {
                         padding: '4px 10px',
                         borderRadius: '6px',
                         fontSize: '12px',
-                        fontFamily: 'monospace'
+                        fontFamily: 'monospace',
                       }}
                     >
                       {tech}
@@ -280,17 +307,18 @@ export function MainWelcomeScreen() {
         </div>
 
         {/* ЛАКОНИЧНЫЙ ФУТЕР ИЗ ДВУХ ОПЦИЙ */}
-        <div style={{
-          position: 'absolute',
-          bottom: '20px',
-          fontSize: '11px',
-          fontFamily: 'monospace',
-          color: '#444',
-          letterSpacing: '0.5px'
-        }}>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            fontSize: '11px',
+            fontFamily: 'monospace',
+            color: '#444',
+            letterSpacing: '0.5px',
+          }}
+        >
           POWERED_WITH // AI_ASSISTANT_ENGINE
         </div>
-
       </div>
     </div>
   );

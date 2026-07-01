@@ -35,7 +35,7 @@ const routes = {
 export const dynamicRoutes = [
   { method: 'GET', pattern: /^\/api\/notes\/(.+)$/, handler: noteController.getNoteByIdHandler },
   { method: 'DELETE', pattern: /^\/api\/notes\/(.+)$/, handler: noteController.deleteNoteHandler },
-  { method: 'PATCH', pattern: /^\/api\/notes\/([a-zA-Z0-9-]+)$/, handler: noteController.updateNoteHandler }
+  { method: 'PATCH', pattern: /^\/api\/notes\/([a-zA-Z0-9-]+)$/, handler: noteController.updateNoteHandler },
 ];
 
 // ========== ПОИСК МАРШРУТА ==========

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 // Сетевой запрос в стиле Return-on-Error
 export const fetchBlogArticles = async () => {
@@ -18,7 +18,7 @@ export const fetchBlogArticles = async () => {
 };
 
 export const getBlogTitles = () => {
-  const [state, setState] = useState([])
+  const [state, setState] = useState([]);
   useEffect(() => {
     const loadArticle = async () => {
       // setMarkdownHtml('$&gt; STREAMING_DATA_FROM_GITHUB...');
@@ -31,12 +31,11 @@ export const getBlogTitles = () => {
       }
 
       if (data) {
-        setState(data)
+        setState(data);
       }
     };
 
     loadArticle();
   }, []);
-  return state
-}
-
+  return state;
+};

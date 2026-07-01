@@ -191,7 +191,9 @@ $font-stack: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-family: $font-stack;
     color: #e4e4e7;
     resize: vertical;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
 
     &:focus {
       outline: none;
@@ -255,7 +257,9 @@ $font-stack: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
   cursor: pointer;
 
   &:hover {
@@ -312,7 +316,9 @@ $font-stack: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       cursor: pointer;
       padding: 0.25rem;
       opacity: 0;
-      transition: opacity 0.2s, color 0.2s;
+      transition:
+        opacity 0.2s,
+        color 0.2s;
 
       &:hover {
         color: #ef4444;
@@ -323,18 +329,15 @@ $font-stack: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
 // Анимации
 @keyframes pulseAnimation {
-
   0%,
   100% {
     opacity: 1;
   }
 
   50% {
-    opacity: .5;
+    opacity: 0.5;
   }
 }
-
-
 
 // ==========================================
 // NEW ELEMENTS: Detailed Note Workspace & Tabs
@@ -376,7 +379,9 @@ $font-stack: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    transition: background-color 0.2s, color 0.2s;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
 
     &:hover {
       background-color: #242424;
@@ -458,7 +463,6 @@ $font-stack: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     overflow-x: auto;
   }
 }
-
 
 // Стилизация окна с сырыми JSON данными
 .jsonPre {

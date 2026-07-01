@@ -15,7 +15,7 @@ export const LocalNotesStrategy: IAppStrategy = {
   title: 'Локальные заметки',
   hash: '#/notes',
   techStack: ['Node.js', 'JSON FS', 'Zod'],
-  getComponent: () => LocalNotesApp
+  getComponent: () => LocalNotesApp,
 };
 
 export const GithubNotesStrategy: IAppStrategy = {
@@ -23,11 +23,10 @@ export const GithubNotesStrategy: IAppStrategy = {
   title: 'GitHub Заметки',
   hash: '#/github',
   techStack: ['GitHub API', 'Remote Fetch', 'Zod'],
-  getComponent: () => GithubNotesApp
+  getComponent: () => GithubNotesApp,
 };
 
 export const appRegistry: Record<string, IAppStrategy> = {
   '#/notes': LocalNotesStrategy,
-  '#/github': GithubNotesStrategy
+  '#/github': GithubNotesStrategy,
 };
-

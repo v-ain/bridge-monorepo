@@ -8,12 +8,8 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
 
 export const IconButton = ({ children, variant = 'default', className = '', ...props }: IconButtonProps) => {
   return (
-    <button
-      className={`${styles.iconBtn} ${styles[variant]} ${className}`}
-      {...props}
-    >
+    <button className={`${styles.iconBtn} ${styles[variant]} ${className}`} {...props}>
       {children}
     </button>
   );
 };
-

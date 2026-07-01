@@ -1,13 +1,13 @@
-import { AppErrorCode, ZodError } from "@bridge-monorepo/shared";
+import { AppErrorCode, ZodError } from '@bridge-monorepo/shared';
 
 const VALID_ERROR_CODES: AppErrorCode[] = [
-  "NOTE_EMPTY",
-  "NOTE_TOO_LONG",
-  "INVALID_JSON_FORMAT",
-  "VALIDATION_ERROR",
-  "NOTE_NOT_FOUND",
-  "PAYLOAD_TOO_LARGE",
-  "INTERNAL_SERVER_ERROR"
+  'NOTE_EMPTY',
+  'NOTE_TOO_LONG',
+  'INVALID_JSON_FORMAT',
+  'VALIDATION_ERROR',
+  'NOTE_NOT_FOUND',
+  'PAYLOAD_TOO_LARGE',
+  'INTERNAL_SERVER_ERROR',
 ];
 
 /**

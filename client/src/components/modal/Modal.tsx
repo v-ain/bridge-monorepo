@@ -1,5 +1,5 @@
-import { ReactNode, useEffect } from 'react'
-import styles from './Modal.module.scss'
+import { ReactNode, useEffect } from 'react';
+import styles from './Modal.module.scss';
 import { usePortal } from './usePortal';
 import { createPortal } from 'react-dom';
 
@@ -10,7 +10,7 @@ interface ModalProps {
 }
 
 const Modal = ({ isOpen, onClose, children }: ModalProps) => {
-  const target = usePortal('modal-root')
+  const target = usePortal('modal-root');
 
   // Закрытие по нажатию Esc
   useEffect(() => {
@@ -33,10 +33,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
 
   return createPortal(
     <div className={styles['modalOverlay']}>
-      <div
-        className={styles.content}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className={styles.content} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeButton} onClick={onClose}>
           &times;
         </button>
@@ -44,7 +41,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
       </div>
     </div>,
     target
-  )
-}
+  );
+};
 
-export default Modal
+export default Modal;

@@ -35,7 +35,6 @@ export type DeleteNoteResponse = DeleteNoteDto;
 
 export type CreateNoteResponse = Pick<NoteEntity, 'id' | 'title' | 'body' | 'createdAt' | 'updatedAt'>;
 
-
 //export type GetNoteParamsDto = Pick<NoteEntity, 'id'>;
 
 // Service Interface (Contract)
@@ -54,15 +53,12 @@ export * from './schemas/note.schema.js';
 export * from './schemas/blog.schema.js';
 
 export type AppErrorCode =
-
   | 'NOTE_EMPTY'
   | 'NOTE_TOO_LONG'
   | 'INVALID_JSON_FORMAT'
-
   | 'VALIDATION_ERROR'
   | 'NOTE_NOT_FOUND'
   | 'PAYLOAD_TOO_LARGE'
-
   | 'INTERNAL_SERVER_ERROR';
 
 export type ApiSuccessResponse<T> = {
@@ -88,4 +84,3 @@ export interface INote extends Note {
   preview: string;
   hasMore: boolean;
 }
-

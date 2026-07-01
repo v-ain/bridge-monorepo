@@ -22,4 +22,3 @@ window.addEventListener('hashchange', () => {
   const matchedStrategy = appRegistry[window.location.hash] || null;
   useNavigationStore.setState({ currentApp: matchedStrategy });
 });
-

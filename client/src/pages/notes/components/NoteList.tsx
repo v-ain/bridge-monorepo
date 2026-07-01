@@ -12,7 +12,9 @@ export const NoteList = () => {
   const { notes, isLoading, globalError: error, fetchNotes } = useNoteStore();
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
 
-  const closeSelectModalWindow = () => { setSelectedNote(null) }
+  const closeSelectModalWindow = () => {
+    setSelectedNote(null);
+  };
 
   useEffect(() => {
     fetchNotes();
@@ -42,9 +44,10 @@ export const NoteList = () => {
           <NoteItem key={note.id} note={note} onModal={setSelectedNote} />
         ))}
       </div>
-      {selectedNote && (<Modal isOpen={!!selectedNote} onClose={closeSelectModalWindow}>
-        <NoteDetail noteId={selectedNote} />
-      </Modal>
+      {selectedNote && (
+        <Modal isOpen={!!selectedNote} onClose={closeSelectModalWindow}>
+          <NoteDetail noteId={selectedNote} />
+        </Modal>
       )}
     </>
   );

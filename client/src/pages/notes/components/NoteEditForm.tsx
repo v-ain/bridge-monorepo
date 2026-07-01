@@ -68,27 +68,14 @@ export const NoteEditForm = ({ initialValue, onSave, onCancel }: NoteEditFormPro
         </span>
 
         {/* Рендерим русский текст с помощью функции getErrorMessage */}
-        {errorKey && (
-          <span className={styles.errorMessage}>
-            ⚠️ {getErrorMessage(errorKey)}
-          </span>
-        )}
+        {errorKey && <span className={styles.errorMessage}>⚠️ {getErrorMessage(errorKey)}</span>}
       </div>
 
       <div className={styles.editActions}>
-        <IconButton
-          onClick={handleFormSubmit}
-          disabled={isSubmitting || isOverLimit}
-          title="Сохранить изменения"
-        >
+        <IconButton onClick={handleFormSubmit} disabled={isSubmitting || isOverLimit} title="Сохранить изменения">
           ✅
         </IconButton>
-        <IconButton
-          variant="danger"
-          onClick={onCancel}
-          disabled={isSubmitting}
-          title="Отменить редактирование"
-        >
+        <IconButton variant="danger" onClick={onCancel} disabled={isSubmitting} title="Отменить редактирование">
           ❌
         </IconButton>
       </div>

@@ -24,7 +24,7 @@ function prepareNoteContent(rawTitle) {
   return { displayTitle, bodyContent };
 }
 
-/** 
+/**
  * @param {string} title
  * @returns {NoteEntity}
  */
@@ -44,7 +44,7 @@ function createNoteEntity(title) {
     updatedAt: new Date().toISOString(),
   };
 
-  return newNote
+  return newNote;
 }
 
 /**
@@ -56,7 +56,7 @@ function updateNoteEntity(oldNote, newTitle) {
   const { displayTitle, bodyContent } = prepareNoteContent(newTitle);
 
   return {
-    ...oldNote,              // Сохраняем id, createdAt и прочие поля
+    ...oldNote, // Сохраняем id, createdAt и прочие поля
     title: displayTitle,
     body: bodyContent,
     updatedAt: new Date().toISOString(), // Обновляем только дату изменения

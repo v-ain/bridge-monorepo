@@ -3,12 +3,10 @@ import { setCorsHeaders, handlePreflight } from './cors.js';
 import { setSecurityHeaders, handlePrefetch } from './security.js';
 import { findRoute } from './routes.js';
 
-
 const DEBUG = process.env.DEBUG === 'true';
 
 // ========== SERVER ==========
 const server = http.createServer(async (req, res) => {
-
   if (DEBUG) {
     console.log('--- DEBUG INFO ---');
     console.log(`URL: ${req.url}`);
