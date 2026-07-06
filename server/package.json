@@ -1,6 +1,7 @@
 {
   "name": "@bridge-monorepo/server",
   "version": "1.0.0",
+  "private": true,
   "description": "Server with JSDoc type checking",
   "type": "module",
   "main": "server.js",
