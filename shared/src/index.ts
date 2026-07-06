@@ -21,21 +21,15 @@ export interface NoteEntity {
   tags?: string[];
 }
 
-export type CreateNoteDto = Pick<NoteEntity, 'title'>;
-
 export type NotePreviewDto = Pick<NoteEntity, 'id' | 'title' | 'createdAt'>;
 
 export type NoteDetailsDto = Pick<NoteEntity, 'body'> & NotePreviewDto;
-
-export type UpdateNoteDto = CreateNoteDto;
 
 export type DeleteNoteDto = Pick<NoteEntity, 'id'>;
 
 export type DeleteNoteResponse = DeleteNoteDto;
 
 export type CreateNoteResponse = Pick<NoteEntity, 'id' | 'title' | 'body' | 'createdAt' | 'updatedAt'>;
-
-//export type GetNoteParamsDto = Pick<NoteEntity, 'id'>;
 
 // Service Interface (Contract)
 export interface INoteService {
@@ -50,16 +44,23 @@ export { z } from 'zod';
 export type { ZodError } from 'zod';
 export * from './schemas/note.schema.js';
 
+export * from './schemas/note.v2.schema.js';
+import { NoteModel, CreateNoteDto, UpdateNoteDto } from './schemas/note.v2.schema.js';
+
 export * from './schemas/blog.schema.js';
 
 export type AppErrorCode =
   | 'NOTE_EMPTY'
   | 'NOTE_TOO_LONG'
+  | 'TITLE_EMPTY'
+  | 'TITLE_TOO_LONG'
+  | 'CONTENT_TOO_LONG'
   | 'INVALID_JSON_FORMAT'
   | 'VALIDATION_ERROR'
   | 'NOTE_NOT_FOUND'
   | 'PAYLOAD_TOO_LARGE'
-  | 'INTERNAL_SERVER_ERROR';
+  | 'INTERNAL_SERVER_ERROR'
+  | 'INVALID_ID_FORMAT';
 
 export type ApiSuccessResponse<T> = {
   data: T;
@@ -73,14 +74,11 @@ export type ApiErrorResponse = {
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
-export interface Note {
-  id: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface INote extends Note {
-  preview: string;
-  hasMore: boolean;
+// Service Interface (Contract)
+export interface INoteServiceV2 {
+  getAll(): Promise<NoteModel[]>;
+  getById(id: string): Promise<NoteModel | null>;
+  create(newNote: CreateNoteDto): Promise<NoteModel>;
+  update(id: string, newNote: UpdateNoteDto): Promise<NoteModel>;
+  delete(id: string): Promise<boolean>;
 }

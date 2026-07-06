@@ -4,7 +4,6 @@ import path from 'node:path';
 
 /**
  * @typedef {import('@bridge-monorepo/shared').NoteEntity} NoteEntity
- * @typedef {import('@bridge-monorepo/shared').CreateNoteDto} CreateNoteDto
  * @typedef {import('@bridge-monorepo/shared').DeleteNoteResponse} DeleteNoteResponse
  * @typedef {import('@bridge-monorepo/shared').INoteService} INoteService
  */
