@@ -10,7 +10,7 @@ import path from 'node:path';
  */
 
 // Берем путь из .env, либо откатываемся на дефолтный относительный путь
-const envPath = process.env.NOTES_PATH || '../../data/dev_notes_v2.json';
+const envPath = process.env.NOTES_PATH || './data/dev_notes_v2.json';
 
 // Склеиваем абсолютный путь от корня запуска сервера
 const NOTES_PATH = path.resolve(process.cwd(), envPath);
