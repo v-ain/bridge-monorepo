@@ -8,6 +8,11 @@ const VALID_ERROR_CODES: AppErrorCode[] = [
   'NOTE_NOT_FOUND',
   'PAYLOAD_TOO_LARGE',
   'INTERNAL_SERVER_ERROR',
+  // НОВЫЕ СТРОГИЕ КОДЫ ОШИБОК V2
+  'TITLE_EMPTY',
+  'TITLE_TOO_LONG',
+  'CONTENT_TOO_LONG',
+  'INVALID_ID_FORMAT',
 ];
 
 /**
