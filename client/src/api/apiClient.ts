@@ -1,10 +1,10 @@
-import { ApiResponse, NoteEntity } from '@bridge-monorepo/shared';
+import { ApiResponse, CreateNoteDto, NoteResponseDto, UpdateNoteDto } from '@bridge-monorepo/shared';
 
 const BASE_URL = 'http://192.168.0.101:3000';
 
 // Изменили Promise<T> на Promise<ApiResponse<T>>
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-  const url = `${BASE_URL}/api${endpoint}`;
+  const url = `${BASE_URL}/api/v2${endpoint}`;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -43,24 +43,24 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 
 // Объект API с жесткими типами на входе и выходе
 export const notesApi = {
-  getAll: () => apiRequest<NoteEntity[]>('/notes'),
+  getAll: () => apiRequest<NoteResponseDto[]>('/notes'),
 
-  getById: (id: string) => apiRequest<NoteEntity>(`/notes/${id}`),
+  getById: (id: string) => apiRequest<NoteResponseDto>(`/notes/${id}`),
 
-  create: (title: string) =>
-    apiRequest<NoteEntity>('/notes', {
+  create: (dto: CreateNoteDto) =>
+    apiRequest<NoteResponseDto>('/notes', {
       method: 'POST',
-      body: JSON.stringify({ title }),
+      body: JSON.stringify(dto),
     }),
 
-  update: (id: string, title: string) =>
-    apiRequest<NoteEntity>(`/notes/${id}`, {
+  update: (id: string, dto: UpdateNoteDto) =>
+    apiRequest<NoteResponseDto>(`/notes/${id}`, {
       method: 'PATCH',
-      body: JSON.stringify({ title }),
+      body: JSON.stringify(dto),
     }),
 
   delete: (id: string) =>
-    apiRequest<{ id: string }>(`/notes/${id}`, {
+    apiRequest<boolean>(`/notes/${id}`, {
       method: 'DELETE',
     }),
 };
