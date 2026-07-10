@@ -1,25 +1,25 @@
 import { readFile, writeFile, rename } from 'node:fs/promises';
-import { createNoteEntity, updateNoteEntity } from './note.mappers.js';
 import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 
 /**
- * @typedef {import('@bridge-monorepo/shared').NoteEntity} NoteEntity
- * @typedef {import('@bridge-monorepo/shared').DeleteNoteResponse} DeleteNoteResponse
- * @typedef {import('@bridge-monorepo/shared').INoteService} INoteService
+ * @typedef {import('@bridge-monorepo/shared').NoteModel} NoteModel
+ * @typedef {import('@bridge-monorepo/shared').INoteServiceV2} INoteService
  */
 
 // Берем путь из .env, либо откатываемся на дефолтный относительный путь
-const envPath = process.env.NOTES_PATH || './data/dev_notes_v2.json';
+// const envPath = process.env.NOTES_PATH || './data/dev_notes_v3.json';
+const envPath = './data/dev_notes_v3.json';
 
 // Склеиваем абсолютный путь от корня запуска сервера
 const NOTES_PATH = path.resolve(process.cwd(), envPath);
 /**
  * @implements {INoteService}
  */
-export class NoteService {
+export class NoteService_v2 {
   constructor() {
     this._filePath = NOTES_PATH;
-    /** @type {NoteEntity[]} */
+    /** @type {NoteModel[]} */
     this._notes = [];
     this._isLoaded = false;
     this._loadingPromise = null;
@@ -34,7 +34,17 @@ export class NoteService {
       try {
         console.log('Reading from file ' + this._filePath);
         const data = await readFile(this._filePath, 'utf-8');
-        this._notes = JSON.parse(data);
+        /** @type {any[]} */
+        const rawEntities = JSON.parse(data);
+
+        this._notes = rawEntities.map((note) => ({
+          id: note.id,
+          title: note.title,
+          content: note.content,
+          tags: note.tags,
+          createdAt: new Date(note.createdAt),
+          updatedAt: new Date(note.updatedAt),
+        }));
       } catch (err) {
         if (err.code === 'ENOENT') {
           console.log('File not found, initializing empty state');
@@ -50,7 +60,9 @@ export class NoteService {
 
     return this._loadingPromise;
   }
-
+  /**
+   * @param {NoteModel[]} nextNotes
+   */
   async _sync(nextNotes) {
     const tempPath = this._filePath + '.tmp';
 
@@ -74,7 +86,7 @@ export class NoteService {
     return this._writeLock;
   }
 
-  /** @returns {Promise<NoteEntity[]>} */
+  /** @returns {Promise<NoteModel[]>} */
   async getAll() {
     await this._loadData();
     // TODO: Возвращать глубокую копию через structuredClone(), чтобы избежать мутации данных по ссылке снаружи
@@ -82,22 +94,30 @@ export class NoteService {
   }
 
   /**
-   * @param {string} title
-   * @returns {Promise<NoteEntity| null>}
+   * @param {import('@bridge-monorepo/shared').CreateNoteDto} dtoNote
+   * @returns {Promise<NoteModel | null>}
    */
-  async create(title) {
+  async create(dtoNote) {
     await this._loadData();
 
-    /** @type {NoteEntity} */
-    const newNote = createNoteEntity(title);
+    /** @type {NoteModel} */
+    const newDomainNote = {
+      // Если фронтенд прислал ID (оптимистичный интерфейс), берем его, иначе генерируем новый UUID v4
+      id: dtoNote.id || randomUUID(),
+      title: dtoNote.title,
+      content: dtoNote.content || '',
+      tags: dtoNote.tags || [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    await this._sync([...this._notes, newNote]);
-    return newNote;
+    await this._sync([...this._notes, newDomainNote]);
+    return newDomainNote;
   }
 
   /**
    * @param {string} id
-   * @returns {Promise<NoteEntity| null>}
+   * @returns {Promise<NoteModel | null>}
    */
   async getById(id) {
     await this._loadData();
@@ -107,25 +127,29 @@ export class NoteService {
     // 3. Если не нашли — возвращаем null (контроллер потом ответит 404)
     if (!note) return null;
 
-    // 4. Возвращаем заметку (здесь можно смапить в DTO, если нужно)
     return note;
   }
 
   /**
    * @param {string} id
-   * @param {string} title
-   * @returns {Promise<NoteEntity>}
+   * @param {import('@bridge-monorepo/shared').UpdateNoteDto} dtoUpdateNote
+   * @returns {Promise<NoteModel>}
    */
-  async update(id, title) {
+  async update(id, dtoUpdateNote) {
     await this._loadData();
 
     let updatedNote = null;
 
-    // Создаем новый массив с измененной заметкой (иммутабельно)
+    // TODO: RaseCondition with paralel write _notes
     const nextNotes = this._notes.map((note) => {
       if (note.id === id) {
-        // Используем наш маппер вместо ручного обновления
-        updatedNote = updateNoteEntity(note, title);
+        updatedNote = {
+          ...note,
+          title: dtoUpdateNote.title !== undefined ? dtoUpdateNote.title : note.title,
+          content: dtoUpdateNote.content !== undefined ? dtoUpdateNote.content : note.content,
+          tags: dtoUpdateNote.tags !== undefined ? dtoUpdateNote.tags : note.tags,
+          updatedAt: new Date(),
+        };
         return updatedNote;
       }
       return note;
@@ -143,7 +167,7 @@ export class NoteService {
 
   /**
    * @param {string} id
-   * @returns {Promise<DeleteNoteResponse>}
+   * @returns {Promise<boolean>}
    */
   async delete(id) {
     // 1. Загружаем данные в кеш
@@ -155,7 +179,7 @@ export class NoteService {
 
     // Если индекс -1, значит заметки нет. Выходим мгновенно.
     if (index === -1) {
-      return null;
+      return false;
     }
 
     // 3. Создаем новый массив БЕЗ этой заметки (иммутабельно)
@@ -166,6 +190,6 @@ export class NoteService {
     // 4. Синхронизируем с диском только измененные данные
     await this._sync(nextNotes);
 
-    return { id };
+    return true;
   }
 }
