@@ -2,49 +2,48 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import styles from './NoteForm.module.scss';
 import { useNoteStore } from '../store/useNoteStore';
-import { NoteInputSchema, NOTE_MAX_LENGTH, AppErrorCode } from '@bridge-monorepo/shared';
-import { parseZodError } from '@/utils/parseZodError'; // проверь путь до утилит
-import { getErrorMessage } from '@/utils/errorMessages'; // проверь путь до утилит
+import { CONTENT_MAX_LENGTH, TITLE_MAX_LENGTH, type AppErrorCode } from '@bridge-monorepo/shared';
+import { getErrorMessage } from '@/utils/errorMessages';
 
 export const NoteForm = () => {
   const addNote = useNoteStore((state) => state.addNote);
-  // Оставляем isLoading, если он нужен для глобального дизейбла
   const isLoading = useNoteStore((state) => state.isLoading);
 
   const [text, setText] = useState('');
   const [errorKey, setErrorKey] = useState<AppErrorCode | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorKey(null);
 
-    // 1. Клиентская валидация через Zod (с авто-тримом)
-    const result = NoteInputSchema.safeParse({ title: text });
-
-    if (!result.success) {
-      const code = parseZodError(result.error);
-      setErrorKey(code);
-      return; // Сеть не трогаем, если Zod завершился ошибкой
+    const trimmedText = text.trim();
+    if (!trimmedText) {
+      setErrorKey('TITLE_EMPTY' as AppErrorCode);
+      return;
     }
 
     setIsSubmitting(true);
 
-    // 2. Отправка на сервер очищенного текста (результат Zod)
-    const serverErrorCode = await addNote(result.data.title);
+    // 1. Отправляем ВСЮ "простыню" текста в стор.
+    // Стор сам нарежет её, отвалидирует через Zod v4 и вернет ошибку, если что-то не так!
+    const serverErrorCode = await addNote(trimmedText);
 
     setIsSubmitting(false);
 
     if (serverErrorCode) {
-      // 3. Если сервер вернул ошибку, выводим её в форму
+      // 2. Если стор или бэк вернули код ошибки, просто выводим её в форму
       setErrorKey(serverErrorCode);
     } else {
-      // 4. Если всё успешно — очищаем поле ввода для новой заметки
+      // 3. Успех — очищаем поле ввода для новой заметки
       setText('');
     }
   };
 
-  const isOverLimit = text.length > NOTE_MAX_LENGTH;
+  // Максимальный лимит для всей "простыни" текста на клиенте (например, 5000 символов)
+  const MAX_TOTAL_NOTE_LENGTH = TITLE_MAX_LENGTH + CONTENT_MAX_LENGTH + 1; // 100 + 3500 + 1 = 3601
+
+  const isOverLimit = text.length > MAX_TOTAL_NOTE_LENGTH;
   const isButtonDisabled = isLoading || isSubmitting || isOverLimit || !text.trim();
 
   return (
@@ -56,18 +55,18 @@ export const NoteForm = () => {
           setText(e.target.value);
           if (errorKey) setErrorKey(null); // Гасим ошибку, когда юзер начинает вводить текст
         }}
-        placeholder="Write your note here..."
+        placeholder="Первая строка станет заголовком, остальные — текстом заметки..."
         rows={3}
         disabled={isLoading || isSubmitting}
       />
 
       <div className={styles.formMeta}>
-        {/* Счетчик символов на основе константы из shared */}
+        {/* Информативный счетчик символов всей заметки */}
         <span className={isOverLimit ? styles.errorLimit : styles.limit}>
-          {text.length} / {NOTE_MAX_LENGTH}
+          {text.length} / {MAX_TOTAL_NOTE_LENGTH}
         </span>
 
-        {/* Вывод ошибки на русском языке */}
+        {/* Вывод ошибки на русском языке через хелпер */}
         {errorKey && <span className={styles.errorMessage}>⚠️ {getErrorMessage(errorKey)}</span>}
       </div>
 

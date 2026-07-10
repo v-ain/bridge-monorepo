@@ -21,6 +21,21 @@
   word-break: break-word;
 }
 
+.subText {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Строго ограничиваем отображение 3 строками */
+  -webkit-box-orient: vertical; /* Задаем вертикальную ориентацию бокса */
+  overflow: hidden; /* Прячем всё, что не влезло */
+  text-overflow: ellipsis; /* Браузер сам красиво поставит троеточие в конце */
+
+  /* Декоративные стили по вкусу */
+  opacity: 0.7;
+  font-size: 0.92em;
+  line-height: 1.5;
+  margin-top: 8px;
+  white-space: pre-line; /* Сохраняем переносы строк юзера в пределах этих 3 строк */
+}
+
 .footer {
   display: flex;
   align-items: center;
