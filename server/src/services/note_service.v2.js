@@ -34,8 +34,22 @@ export class NoteService_v2 {
       try {
         console.log('Reading from file ' + this._filePath);
         const data = await readFile(this._filePath, 'utf-8');
-        /** @type {any[]} */
-        const rawEntities = JSON.parse(data);
+
+        let rawEntities = [];
+        // ЗАЩИТА: Если файл пустой или мусор
+        if (data && data.trim() !== '') {
+          try {
+            rawEntities = JSON.parse(data);
+            // Дополнительная страховка: если вдруг там не массив
+            if (!Array.isArray(rawEntities)) {
+              console.warn('File content is not an array, resetting to empty state');
+              rawEntities = [];
+            }
+          } catch (e) {
+            console.error('Corrupted JSON file detected, resetting to empty state');
+            rawEntities = [];
+          }
+        }
 
         this._notes = rawEntities.map((note) => ({
           id: note.id,
