@@ -1,5 +1,6 @@
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import webpack from 'webpack';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { fileURLToPath } from 'url';
 
@@ -76,6 +77,10 @@ export default {
           }),
         ]
       : []),
+    new webpack.DefinePlugin({
+      'process.env.API_HOST': JSON.stringify(process.env.API_HOST || 'localhost'),
+      'process.env.API_PORT': JSON.stringify(process.env.API_PORT || '3000'),
+    }),
   ],
 
   devServer: {

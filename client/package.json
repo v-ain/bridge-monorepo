@@ -5,7 +5,7 @@
   "description": "React client app",
   "type": "module",
   "scripts": {
-    "dev": "webpack serve --mode development",
+    "dev": "API_HOST=192.168.0.101 API_PORT=3000 webpack serve --mode development",
     "build": "cross-env NODE_ENV=production webpack",
     "check-types": "tsc --noEmit"
   },

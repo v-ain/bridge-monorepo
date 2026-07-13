@@ -1,6 +1,6 @@
 import { ApiResponse, CreateNoteDto, NoteResponseDto, UpdateNoteDto } from '@bridge-monorepo/shared';
 
-const BASE_URL = 'http://192.168.0.101:3000';
+const BASE_URL = `http://${process.env.API_HOST}:${process.env.API_PORT}`;
 
 // Изменили Promise<T> на Promise<ApiResponse<T>>
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
