@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 export const TITLE_MAX_LENGTH = 100;
-export const CONTENT_MAX_LENGTH = 3500;
-// export const NOTE_MAX_LENGTH = 3500;
+export const CONTENT_MAX_LENGTH = 5000;
 
 export const BaseModelSchema = z.object({
   id: z.uuid({ message: 'INVALID_ID_FORMAT' }),
