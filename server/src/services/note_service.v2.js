@@ -8,8 +8,7 @@ import { randomUUID } from 'node:crypto';
  */
 
 // Берем путь из .env, либо откатываемся на дефолтный относительный путь
-// const envPath = process.env.NOTES_PATH || './data/dev_notes_v3.json';
-const envPath = './data/dev_notes_v3.json';
+const envPath = process.env.NOTES_V3_PATH || './data/dev_notes_v3.json';
 
 // Склеиваем абсолютный путь от корня запуска сервера
 const NOTES_PATH = path.resolve(process.cwd(), envPath);
