@@ -8,7 +8,14 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 export default [
   // 1. Игнорируемые папки
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/.vite/**'],
+    ignores: [
+      '**/webpack.config.js',
+      '**/eslint.config.js',
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.vite/**',
+      '**/*.config.*',
+    ],
   },
 
   // 2. Базовые правила для всего монорепозитория
