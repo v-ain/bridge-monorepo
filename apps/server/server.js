@@ -5,7 +5,7 @@ import { findRoute } from './routes.js';
 import path from 'path';
 import fs from 'fs';
 
-const envPath = path.resolve(import.meta.dirname, '../.env');
+const envPath = path.resolve(import.meta.dirname, '../../.env');
 
 if (fs.existsSync(envPath)) {
   try {

@@ -33,7 +33,7 @@ export default [
 
   // 4. Специфика фронтенда (Применяется только к папке client)
   {
-    files: ['client/**/*.{ts,tsx}'],
+    files: ['apps/client/**/*.{ts,tsx}'],
     plugins: {
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
@@ -59,7 +59,7 @@ export default [
 
   // 5. Специфика бэкенда (Применяется только к папке server)
   {
-    files: ['server/**/*.{ts,js}'],
+    files: ['apps/server/**/*.{ts,js}'],
     languageOptions: {
       // Добавляем глобальные переменные Node.js (process, require, __dirname)
       globals: {

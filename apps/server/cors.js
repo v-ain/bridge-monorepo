@@ -1,11 +1,10 @@
-const ALLOWED_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3001';
-
-export const CORS_ORIGIN = ALLOWED_ORIGIN;
 /**
  * Устанавливает CORS заголовки
  * @param {import('http').ServerResponse} res
  */
 export const setCorsHeaders = (res) => {
+  const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3001';
+
   res.setHeader('Access-Control-Allow-Origin', CORS_ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
