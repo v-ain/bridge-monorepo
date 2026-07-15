@@ -2,6 +2,21 @@ import http from 'http';
 import { setCorsHeaders, handlePreflight } from './cors.js';
 import { setSecurityHeaders, handlePrefetch } from './security.js';
 import { findRoute } from './routes.js';
+import path from 'path';
+import fs from 'fs';
+
+const envPath = path.resolve(import.meta.dirname, '../.env');
+
+if (fs.existsSync(envPath)) {
+  try {
+    process.loadEnvFile(envPath);
+    console.log('Environment variables successfully loaded from the monorepo root');
+  } catch (err) {
+    console.warn('Error reading .env file, using default settings');
+  }
+} else {
+  console.log('.env file not found in root, server starting on default ports');
+}
 
 const DEBUG = process.env.DEBUG === 'true';
 

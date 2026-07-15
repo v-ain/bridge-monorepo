@@ -3,9 +3,38 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// --- НАЧАЛО ЧТЕНИЯ .ENV БЕЗ ПАКЕТОВ ---
+const envPath = path.resolve(__dirname, '../.env');
+
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+
+  envContent.split('\n').forEach((line) => {
+    // Игнорируем пустые строки и комментарии
+    const trimmedLine = line.trim();
+    if (!trimmedLine || trimmedLine.startsWith('#')) return;
+
+    // Находим первую равно и делим строку на ключ/значение
+    const firstEquals = trimmedLine.indexOf('=');
+    if (firstEquals === -1) return;
+
+    const key = trimmedLine.slice(0, firstEquals).trim();
+    let value = trimmedLine.slice(firstEquals + 1).trim();
+
+    // Очищаем кавычки, если они есть (например, API_HOST="localhost")
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+
+    // Записываем в глобальный процесс
+    process.env[key] = value;
+  });
+}
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -23,7 +52,6 @@ export default {
     extensions: ['.tsx', '.ts', '.jsx', '.js'],
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      '@shared': path.resolve(__dirname, '../shared'),
     },
   },
 
@@ -38,7 +66,6 @@ export default {
             cacheDirectory: true,
           },
         },
-        include: [path.resolve(__dirname, 'src'), path.resolve(__dirname, '../shared')],
       },
       {
         test: /\.module\.scss$/,
@@ -84,7 +111,8 @@ export default {
   ],
 
   devServer: {
-    port: 3001,
+    port: Number.parseInt(process.env.DEV_CLIENT_PORT, 10) || 3001,
+    host: '0.0.0.0',
     hot: true,
     historyApiFallback: true,
   },
