@@ -7,11 +7,21 @@ import { randomUUID } from 'node:crypto';
  * @typedef {import('@bridge-monorepo/shared').INoteServiceV2} INoteService
  */
 
-// Берем путь из .env, либо откатываемся на дефолтный относительный путь
 const envPath = process.env.NOTES_V3_PATH || './data/dev_notes_v3.json';
-
-// Склеиваем абсолютный путь от корня запуска сервера
 const NOTES_PATH = path.resolve(process.cwd(), envPath);
+
+/**
+ * NoteService_v2
+ *
+ * Реализация файлового хранилища с in-memory кэшем.
+ * ВАЖНО: Данная реализация рассчитана на запуск в ОДНОМ процессе (single-instance).
+ * Механизм защиты от гонок (_writeLock) работает только внутри памяти одного процесса.
+ *
+ * Для запуска в нескольких процессах (PM2 cluster, Kubernetes replicas) необходимо:
+ * 1. Заменить слой хранения на СУБД (SQLite/PostgreSQL) с использованием транзакций.
+ * ИЛИ
+ * 2. Внедрить внешнюю блокировку файлов (proper-lockfile) и инвалидацию кэша по mtime.
+ */
 /**
  * @implements {INoteService}
  */
@@ -31,25 +41,22 @@ export class NoteService_v2 {
 
     this._loadingPromise = (async () => {
       try {
-        console.log('Reading from file ' + this._filePath);
+        console.log(`[INFO] Reading the database: ${this._filePath}`);
         const data = await readFile(this._filePath, 'utf-8');
 
-        let rawEntities = [];
-        // ЗАЩИТА: Если файл пустой или мусор
-        if (data && data.trim() !== '') {
-          try {
-            rawEntities = JSON.parse(data);
-            // Дополнительная страховка: если вдруг там не массив
-            if (!Array.isArray(rawEntities)) {
-              console.warn('File content is not an array, resetting to empty state');
-              rawEntities = [];
-            }
-          } catch (e) {
-            console.error('Corrupted JSON file detected, resetting to empty state');
-            rawEntities = [];
-          }
+        // ЗАЩИТА: Если файл физически есть, но он пустой — это аномалия (битый файл)
+        if (!data || data.trim() === '') {
+          throw new Error('The database file is empty. Overwriting is not possible to avoid data loss.');
         }
 
+        // Парсим JSON. Если он сломан — SyntaxError вылетит наружу и спасет файл.
+        const rawEntities = JSON.parse(data);
+
+        if (!Array.isArray(rawEntities)) {
+          throw new Error('Critical error: Data in JSON file is not an array!');
+        }
+
+        // Маппинг типов (строки -> Date)
         this._notes = rawEntities.map((note) => ({
           id: note.id,
           title: note.title,
@@ -58,40 +65,48 @@ export class NoteService_v2 {
           createdAt: new Date(note.createdAt),
           updatedAt: new Date(note.updatedAt),
         }));
+
+        this._isLoaded = true;
       } catch (err) {
         if (err.code === 'ENOENT') {
-          console.log('File not found, initializing empty state');
+          // УДОБСТВО: Файла вообще нет? Это не ошибка, это первый запуск. Инициализируем пустой массив.
+          console.log('[INFO] File not found, initializing empty state');
           this._notes = [];
+          this._isLoaded = true;
         } else {
-          throw err; // Пробрасываем критические ошибки (права доступа и т.д.)
+          // АВАРИЯ: Файл битый, пустой или заблокирован ОС.
+          console.error(`\n[CRITICAL DB ERROR] [${new Date().toISOString()}] File reading failure!`);
+          console.error(`Details: ${err.message}\n`);
+
+          this._loadingPromise = null; // Сбрасываем обещание, чтобы система не зависла
+          throw new Error('Database Corrupted or Inaccessible. Operation aborted.');
         }
-      } finally {
-        this._isLoaded = true;
-        this._loadingPromise = null;
       }
     })();
 
     return this._loadingPromise;
   }
+
   /**
-   * @param {NoteModel[]} nextNotes
+   * Атомарная синхронизация с диском через очередь
+   * @param {(currentNotes: NoteModel[]) => NoteModel[]} updateFn
    */
-  async _sync(nextNotes) {
+  async _sync(updateFn) {
     const tempPath = this._filePath + '.tmp';
 
     this._writeLock = this._writeLock.then(async () => {
       try {
-        // Пишем в файл
-        await writeFile(tempPath, JSON.stringify(nextNotes, null, 2));
+        const nextNotes = updateFn(this._notes);
 
-        await rename(tempPath, this._filePath);
-        // Если запись успешна, обновляем состояние
+        await writeFile(tempPath, JSON.stringify(nextNotes, null, 2));
+        await rename(tempPath, this._filePath); // Атомарная замена
+
         this._notes = nextNotes;
         this._isLoaded = true;
       } catch (err) {
-        // В случае ошибки сбрасываем флаг, чтобы при следующем запросе
-        // данные были перечитаны с диска
+        // При ошибке записи сбрасываем кэш, чтобы система перечитала данные с диска
         this._isLoaded = false;
+        console.error('[ERROR] Error writing to file:', err.message);
         throw err;
       }
     });
@@ -102,30 +117,7 @@ export class NoteService_v2 {
   /** @returns {Promise<NoteModel[]>} */
   async getAll() {
     await this._loadData();
-    // TODO: Возвращать глубокую копию через structuredClone(), чтобы избежать мутации данных по ссылке снаружи
-    return this._notes;
-  }
-
-  /**
-   * @param {import('@bridge-monorepo/shared').CreateNoteDto} dtoNote
-   * @returns {Promise<NoteModel | null>}
-   */
-  async create(dtoNote) {
-    await this._loadData();
-
-    /** @type {NoteModel} */
-    const newDomainNote = {
-      // Если фронтенд прислал ID (оптимистичный интерфейс), берем его, иначе генерируем новый UUID v4
-      id: dtoNote.id || randomUUID(),
-      title: dtoNote.title,
-      content: dtoNote.content || '',
-      tags: dtoNote.tags || [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    await this._sync([...this._notes, newDomainNote]);
-    return newDomainNote;
+    return [...this._notes];
   }
 
   /**
@@ -134,47 +126,85 @@ export class NoteService_v2 {
    */
   async getById(id) {
     await this._loadData();
-
     const note = this._notes.find((n) => n.id === id);
+    return note || null;
+  }
 
-    // 3. Если не нашли — возвращаем null (контроллер потом ответит 404)
-    if (!note) return null;
+  /**
+   * @param {import('@bridge-monorepo/shared').CreateNoteDto} dtoNote
+   * @returns {Promise<NoteModel>}
+   */
+  async create(dtoNote) {
+    await this._loadData();
 
-    return note;
+    // 1. Определяем ID. Если клиент не прислал — генерируем сами.
+    const proposedId = dtoNote.id ? dtoNote.id : randomUUID();
+
+    let createdNote = null;
+
+    // 2. Встаем в очередь. Внутри этой функции currentNotes — это самые свежие данные.
+    await this._sync((currentNotes) => {
+      // 3. ПРОВЕРКА НА ДУБЛИКАТ (Критически важно!)
+      const exists = currentNotes.some((note) => note.id === proposedId);
+
+      if (exists) {
+        // Выбрасываем ошибку прямо здесь. _sync перехватит её, откатит состояние и пробросит наверх.
+        throw new Error(`Note with id '${proposedId}' already exists.`);
+      }
+
+      // 4. Создаем объект заметки
+      createdNote = {
+        id: proposedId,
+        title: dtoNote.title,
+        content: dtoNote.content || '',
+        tags: dtoNote.tags || [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // 5. Возвращаем новый массив с добавленной заметкой
+      return [...currentNotes, createdNote];
+    });
+
+    // 6. Возвращаем созданную заметку
+    return createdNote;
   }
 
   /**
    * @param {string} id
    * @param {import('@bridge-monorepo/shared').UpdateNoteDto} dtoUpdateNote
-   * @returns {Promise<NoteModel>}
+   * @returns {Promise<NoteModel | null>}
    */
   async update(id, dtoUpdateNote) {
     await this._loadData();
 
     let updatedNote = null;
 
-    // TODO: RaseCondition with paralel write _notes
-    const nextNotes = this._notes.map((note) => {
-      if (note.id === id) {
-        updatedNote = {
-          ...note,
-          title: dtoUpdateNote.title !== undefined ? dtoUpdateNote.title : note.title,
-          content: dtoUpdateNote.content !== undefined ? dtoUpdateNote.content : note.content,
-          tags: dtoUpdateNote.tags !== undefined ? dtoUpdateNote.tags : note.tags,
-          updatedAt: new Date(),
-        };
-        return updatedNote;
+    await this._sync((currentNotes) => {
+      const index = currentNotes.findIndex((note) => note.id === id);
+
+      if (index === -1) {
+        return currentNotes;
       }
-      return note;
+
+      const oldNote = currentNotes[index];
+
+      updatedNote = {
+        ...oldNote,
+
+        title: dtoUpdateNote.title !== undefined ? dtoUpdateNote.title : oldNote.title,
+        content: dtoUpdateNote.content !== undefined ? dtoUpdateNote.content : oldNote.content,
+        tags: dtoUpdateNote.tags !== undefined ? dtoUpdateNote.tags : oldNote.tags,
+
+        updatedAt: new Date(),
+      };
+
+      const nextNotes = [...currentNotes];
+      nextNotes[index] = updatedNote;
+
+      return nextNotes;
     });
 
-    if (!updatedNote) {
-      return null;
-    }
-
-    await this._sync(nextNotes);
-
-    // Возвращаем обновленный объект
     return updatedNote;
   }
 
@@ -183,26 +213,18 @@ export class NoteService_v2 {
    * @returns {Promise<boolean>}
    */
   async delete(id) {
-    // 1. Загружаем данные в кеш
     await this._loadData();
+    let wasFound = false;
 
-    // 2. Ищем индекс за ОДИН проход.
-    // Метод остановится сразу, как только найдет совпадение.
-    const index = this._notes.findIndex((note) => note.id === id);
-
-    // Если индекс -1, значит заметки нет. Выходим мгновенно.
-    if (index === -1) {
-      return false;
-    }
-
-    // 3. Создаем новый массив БЕЗ этой заметки (иммутабельно)
-    // Используем slice: копируем всё ДО индекса и всё ПОСЛЕ индекса.
-    // Это работает быстрее, чем .filter(), так как V8 точно знает границы копирования.
-    const nextNotes = [...this._notes.slice(0, index), ...this._notes.slice(index + 1)];
-
-    // 4. Синхронизируем с диском только измененные данные
-    await this._sync(nextNotes);
-
-    return true;
+    await this._sync((currentNotes) => {
+      return currentNotes.filter((note) => {
+        if (note.id === id) {
+          wasFound = true;
+          return false;
+        }
+        return true;
+      });
+    });
+    return wasFound;
   }
 }
