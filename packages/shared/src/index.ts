@@ -60,7 +60,8 @@ export type AppErrorCode =
   | 'NOTE_NOT_FOUND'
   | 'PAYLOAD_TOO_LARGE'
   | 'INTERNAL_SERVER_ERROR'
-  | 'INVALID_ID_FORMAT';
+  | 'INVALID_ID_FORMAT'
+  | 'DUPLICATE_ID';
 
 export type ApiSuccessResponse<T> = {
   data: T;
