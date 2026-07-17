@@ -273,6 +273,11 @@ export class NoteController_v2 {
       return this._sendResponse(res, 413, null, 'PAYLOAD_TOO_LARGE', req);
     }
 
+    if (error.message && error.message.includes('already exists')) {
+      console.warn(`[CONFLICT] ${contextInfo}: Duplicate ID detected.`);
+      return this._sendResponse(res, 409, null, 'DUPLICATE_ID');
+    }
+
     // Любой другой форс-мажор (упала база данных, файловая система и т.д.)
     console.error(`[SERVER ERROR] ${contextInfo}:`, error);
     return this._sendResponse(res, 500, null, 'INTERNAL_SERVER_ERROR');
