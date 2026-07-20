@@ -7,7 +7,7 @@ import { IconButton } from '@/components/ui/icon-button/IconButton';
 import styles from './NoteItem.module.scss';
 
 interface NoteItemProps {
-  note: NoteUi; // Перешли с NoteEntity на строгую NoteUi из shared пакета
+  note: NoteUi;
   onModal: (id: string) => void;
 }
 
@@ -16,10 +16,8 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
   const updateNote = useNoteStore((state) => state.updateNote);
   const deleteNote = useNoteStore((state) => state.deleteNote);
   const toggleEditMode = useNoteStore((state) => state.toggleEditMode);
-  const toggleSelect = useNoteStore((state) => state.toggleSelect);
-
-  // Локальный useState для текста и редактирования больше НЕ нужен!
-  // Текст теперь "умной простынёй" управляется внутри NoteEditForm и Стора.
+  // TODO: Implement note selection feature and reactive store hooks
+  // const toggleSelect = useNoteStore((state) => state.toggleSelect);
 
   const handleSave = async (cleanText: string): Promise<AppErrorCode | null> => {
     // Шлем простыню текста в стор V2. Он сам её нарежет на title и content
@@ -32,7 +30,7 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
     }
   };
 
-  // Красота: Бэкенд v2 гарантирует ISO-строку. Но на фронте в DTO это всё еще строка,
+  // Бэкенд v2 гарантирует ISO-строку. Но на фронте в DTO это всё еще строка,
   // поэтому легкий парсинг в объект даты оставляем для локализации локали
   const formattedDate = new Date(note.updatedAt).toLocaleString();
 
@@ -56,7 +54,7 @@ export const NoteItem = ({ note, onModal }: NoteItemProps) => {
     <Card hover className={note.isSelected ? styles.selectedCard : ''}>
       <div className={styles.itemLayout}>
         <div className={styles.header}>
-          {/* Наш новый чекбокс управления выделением карточки из стора */}
+          {/* TODO: Implement note selection feature and reactive store hooks*/}
           {/* <input */}
           {/*   type="checkbox" */}
           {/*   checked={!!note.isSelected} */}

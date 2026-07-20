@@ -1,29 +1,28 @@
-import { useState, useLayoutEffect } from 'react';
+import { useSyncExternalStore } from 'react';
+
+// Функция-заглушка для SSR (серверного рендеринга)
+const emptySubscribe = () => () => {};
 
 export const usePortal = (wrapperId: string = 'modal-root') => {
-  const [wrapperElement, setWrapperElement] = useState<HTMLElement | null>(null);
+  // Подписываемся на состояние DOM-элемента
+  return useSyncExternalStore(
+    // 1. Функция подписки (в данном случае нам не нужно слушать события, просто возвращаем чистку)
+    emptySubscribe,
 
-  useLayoutEffect(() => {
-    let element = document.getElementById(wrapperId);
-    let created = false;
+    // 2. Как получить значение на клиенте
+    () => {
+      if (typeof document === 'undefined') return null;
+      let element = document.getElementById(wrapperId);
 
-    // Если элемента с таким id нет (забыли добавить в html), создаем его сами
-    if (!element) {
-      created = true;
-      element = document.createElement('div');
-      element.setAttribute('id', wrapperId);
-      document.body.appendChild(element);
-    }
-
-    setWrapperElement(element);
-
-    // Удаляем созданный элемент при размонтировании, если мы его сами создавали
-    return () => {
-      if (created && element?.parentNode) {
-        element.parentNode.removeChild(element);
+      if (!element) {
+        element = document.createElement('div');
+        element.setAttribute('id', wrapperId);
+        document.body.appendChild(element);
       }
-    };
-  }, [wrapperId]);
+      return element;
+    },
 
-  return wrapperElement;
+    // 3. Значение по умолчанию для сервера (SSR)
+    () => null
+  );
 };

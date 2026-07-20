@@ -1,6 +1,4 @@
 import React from 'react';
-import { AppNotes as LocalNotesApp } from '@/pages/notes';
-import { AppBlogConsole as GithubNotesApp } from '@/pages/blog-console';
 
 export interface IAppStrategy {
   id: 'notes' | 'github';
@@ -15,7 +13,7 @@ export const LocalNotesStrategy: IAppStrategy = {
   title: 'Локальные заметки',
   hash: '#/notes',
   techStack: ['Node.js', 'JSON FS', 'Zod'],
-  getComponent: () => LocalNotesApp,
+  getComponent: () => React.lazy(() => import('@/pages/notes').then((module) => ({ default: module.AppNotes }))),
 };
 
 export const appRegistry: Record<string, IAppStrategy> = {

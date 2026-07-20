@@ -2,23 +2,34 @@ import { create } from 'zustand';
 import { IAppStrategy, appRegistry } from './strategies';
 
 interface NavigationState {
-  currentApp: IAppStrategy | null; // null — это главная страница входа
+  currentApp: IAppStrategy | null;
   selectApp: (strategy: IAppStrategy | null) => void;
 }
 
-export const useNavigationStore = create<NavigationState>((set) => ({
-  // При инициализации стора сразу проверяем, нет ли хэша в ссылке
-  currentApp: appRegistry[window.location.hash] || null,
+// Проверяем наличие window для безопасности окружения
+const getInitialApp = (): IAppStrategy | null => {
+  if (typeof window === 'undefined') return null;
+  return appRegistry[window.location.hash] || null;
+};
+
+export const useNavigationStore = create<NavigationState>(() => ({
+  currentApp: getInitialApp(),
 
   selectApp: (strategy) => {
-    // Обновляем хэш в строке браузера (автоматически добавит или уберет #/...)
+    if (typeof window === 'undefined') return;
+    // Браузер сам выстрелит событие hashchange, и код ниже обновит стейт!
     window.location.hash = strategy ? strategy.hash : '';
-    set({ currentApp: strategy });
   },
 }));
 
-// Слушаем нативное событие браузера на изменение хэша
-window.addEventListener('hashchange', () => {
-  const matchedStrategy = appRegistry[window.location.hash] || null;
-  useNavigationStore.setState({ currentApp: matchedStrategy });
-});
+// Единая точка правды для синхронизации URL и Zustand
+if (typeof window !== 'undefined') {
+  window.addEventListener('hashchange', () => {
+    const matchedStrategy = appRegistry[window.location.hash] || null;
+    // Сравниваем текущий стейт с новым, чтобы избежать лишних рендеров
+    const currentState = useNavigationStore.getState().currentApp;
+    if (currentState?.hash !== matchedStrategy?.hash) {
+      useNavigationStore.setState({ currentApp: matchedStrategy });
+    }
+  });
+}

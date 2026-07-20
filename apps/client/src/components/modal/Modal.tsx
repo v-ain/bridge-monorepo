@@ -10,7 +10,7 @@ interface ModalProps {
 }
 
 const Modal = ({ isOpen, onClose, children }: ModalProps) => {
-  const target = usePortal('modal-root');
+  const targetElement = usePortal('modal-root');
 
   // Закрытие по нажатию Esc
   useEffect(() => {
@@ -29,18 +29,19 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen || !target) return null;
+  if (!isOpen || !targetElement) return null;
 
   return createPortal(
-    <div className={styles['modalOverlay']}>
+    <div className={styles['modalOverlay']} onClick={onClose}>
+      {/* stopPropagation нужен, чтобы клик внутри самой модалки не закрывал её */}
       <div className={styles.content} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.closeButton} onClick={onClose}>
+        <button className={styles.closeButton} onClick={onClose} aria-label="Закрыть модальное окно">
           &times;
         </button>
         {children}
       </div>
     </div>,
-    target
+    targetElement
   );
 };
 
