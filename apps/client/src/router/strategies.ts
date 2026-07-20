@@ -18,15 +18,6 @@ export const LocalNotesStrategy: IAppStrategy = {
   getComponent: () => LocalNotesApp,
 };
 
-export const GithubNotesStrategy: IAppStrategy = {
-  id: 'github',
-  title: 'GitHub Заметки',
-  hash: '#/github',
-  techStack: ['GitHub API', 'Remote Fetch', 'Zod'],
-  getComponent: () => GithubNotesApp,
-};
-
 export const appRegistry: Record<string, IAppStrategy> = {
   '#/notes': LocalNotesStrategy,
-  '#/github': GithubNotesStrategy,
 };

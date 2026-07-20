@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigationStore } from '@/router/useNavigationStore';
-import { LocalNotesStrategy, GithubNotesStrategy } from '@/router/strategies';
+import { LocalNotesStrategy } from '@/router/strategies';
 
 export function MainWelcomeScreen() {
   const selectApp = useNavigationStore((state) => state.selectApp);
-  const [isServerOnline, setIsServerOnline] = useState(true);
+  const isServerOnline = true;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const apps = [LocalNotesStrategy, GithubNotesStrategy];
+  const apps = [LocalNotesStrategy];
 
+  const [isHovered, setIsHovered] = useState(false);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -230,9 +231,6 @@ export function MainWelcomeScreen() {
           }}
         >
           {apps.map((app) => {
-            const isGithub = app.id === 'github';
-            const [isHovered, setIsHovered] = useState(false);
-
             return (
               <div
                 key={app.id}
@@ -243,17 +241,13 @@ export function MainWelcomeScreen() {
                   backgroundColor: '#131314',
                   color: '#ededed',
                   border: '1px solid',
-                  borderColor: isHovered ? (isGithub ? '#ff9f1c' : '#ffffff') : '#222223',
+                  borderColor: isHovered ? '#ffffff' : '#222223',
                   borderRadius: '14px',
                   padding: '32px',
                   cursor: 'pointer',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
-                  boxShadow: isHovered
-                    ? isGithub
-                      ? '0 10px 40px rgba(255,159,28,0.06)'
-                      : '0 10px 40px rgba(255,255,255,0.04)'
-                    : 'none',
+                  boxShadow: isHovered ? '0 10px 40px rgba(255,255,255,0.04)' : 'none',
                 }}
               >
                 <div
@@ -269,18 +263,18 @@ export function MainWelcomeScreen() {
                     style={{
                       fontSize: '11px',
                       fontFamily: 'monospace',
-                      color: isHovered ? (isGithub ? '#ff9f1c' : '#ffffff') : '#555',
+                      color: isHovered ? '#ffffff' : '#555',
                       transition: 'color 0.3s',
                     }}
                   >
-                    {isGithub ? '[SYS_CONSOLE]' : '[B2B_MODULE]'}
+                    {'[B2B_MODULE]'}
                   </span>
                 </div>
 
                 <p style={{ fontSize: '14px', color: '#888', margin: '0 0 24px 0', lineHeight: '1.5' }}>
-                  {isGithub
-                    ? 'Интерактивная консоль для работы с удаленными репозиториями, парсинга блогов и низкоуровневой телеметрии.'
-                    : 'Минималистичный текстовый интерфейс для управления локальными заметками и архитектурными инсайтами.'}
+                  {
+                    'Минималистичный текстовый интерфейс для управления локальными заметками и архитектурными инсайтами.'
+                  }
                 </p>
 
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -289,7 +283,7 @@ export function MainWelcomeScreen() {
                       key={tech}
                       style={{
                         backgroundColor: '#19191b',
-                        color: isGithub ? '#04f06c' : '#999',
+                        color: '#04f06c',
                         border: '1px solid #252527',
                         padding: '4px 10px',
                         borderRadius: '6px',
