@@ -41,7 +41,7 @@ export class NoteService_v2 {
 
     this._loadingPromise = (async () => {
       try {
-        console.log(`[INFO] Reading the database: ${this._filePath}`);
+        console.info(`[INFO] Reading the database: ${this._filePath}`);
         const data = await readFile(this._filePath, 'utf-8');
 
         // ЗАЩИТА: Если файл физически есть, но он пустой — это аномалия (битый файл)
@@ -70,7 +70,7 @@ export class NoteService_v2 {
       } catch (err) {
         if (err.code === 'ENOENT') {
           // УДОБСТВО: Файла вообще нет? Это не ошибка, это первый запуск. Инициализируем пустой массив.
-          console.log('[INFO] File not found, initializing empty state');
+          console.info('[INFO] File not found, initializing empty state');
           this._notes = [];
           this._isLoaded = true;
         } else {

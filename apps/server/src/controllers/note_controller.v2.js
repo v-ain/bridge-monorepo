@@ -110,7 +110,7 @@ export class NoteController_v2 {
     } finally {
       // Выполнится в любом случае (и в случае успеха, и после ошибки)
       const time = new Date().toLocaleTimeString();
-      console.log(`[${time}] Note [${createdNoteId}] processed (${requestSize} bytes)`);
+      console.info(`[${time}] Note [${createdNoteId}] processed (${requestSize} bytes)`);
     }
   };
 
@@ -161,7 +161,7 @@ export class NoteController_v2 {
     } finally {
       // Лог сработает ВСЕГДА и зафиксирует реальный размер обработанных байт
       const time = new Date().toLocaleTimeString();
-      console.log(`[${time}] Note [${id}] UPDATED (${requestSize} bytes)`);
+      console.info(`[${time}] Note [${id}] UPDATED (${requestSize} bytes)`);
     }
   };
 
@@ -188,7 +188,7 @@ export class NoteController_v2 {
     } catch (error) {
       return this._handleSystemError(res, error, null, `[DELETE /api/notes/${id}]`);
     } finally {
-      console.log(`[${new Date().toLocaleTimeString()}] Note [${id}] DELETED`);
+      console.info(`[${new Date().toLocaleTimeString()}] Note [${id}] DELETED`);
     }
   };
 
@@ -221,6 +221,7 @@ export class NoteController_v2 {
           resolve({ data, size });
           // const bodyString = rawBody.toString('utf-8');
           // resolve(bodyString ? JSON.parse(bodyString) : {});
+          /* eslint-disable-next-line */
         } catch (e) {
           reject(new Error('Invalid JSON format'));
         } finally {

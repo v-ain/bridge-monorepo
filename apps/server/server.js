@@ -10,12 +10,12 @@ const envPath = path.resolve(import.meta.dirname, '../../.env');
 if (fs.existsSync(envPath)) {
   try {
     process.loadEnvFile(envPath);
-    console.log('Environment variables successfully loaded from the monorepo root');
-  } catch (err) {
+    console.info('Environment variables successfully loaded from the monorepo root');
+  } catch {
     console.warn('Error reading .env file, using default settings');
   }
 } else {
-  console.log('.env file not found in root, server starting on default ports');
+  console.info('.env file not found in root, server starting on default ports');
 }
 
 const DEBUG = process.env.DEBUG === 'true';
@@ -23,9 +23,9 @@ const DEBUG = process.env.DEBUG === 'true';
 // ========== SERVER ==========
 const server = http.createServer(async (req, res) => {
   if (DEBUG) {
-    console.log('--- DEBUG INFO ---');
-    console.log(`URL: ${req.url}`);
-    console.log(`Заголовки:`, req.headers);
+    console.info('--- DEBUG INFO ---');
+    console.info(`URL: ${req.url}`);
+    console.info(`Заголовки:`, req.headers);
   }
 
   // FILTER: SPECTRE PREFETCH
@@ -41,7 +41,7 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
 
-  console.log(`[${new Date().toLocaleTimeString()}] Вход: ${req.method} ${pathname}`);
+  console.info(`[${new Date().toLocaleTimeString()}] Вход: ${req.method} ${pathname}`);
 
   const route = findRoute(req.method, pathname);
 
@@ -62,5 +62,5 @@ const server = http.createServer(async (req, res) => {
 const PORT = Number(process.env.PORT) || 3000;
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('\x1b[32m%s\x1b[0m', `Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.info('\x1b[32m%s\x1b[0m', `Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });

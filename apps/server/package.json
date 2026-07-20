@@ -10,6 +10,8 @@
     "dev": "node --watch server.js",
     "check-types": "tsc --project tsconfig.json --noEmit",
     "start:prod": "node server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "bash test.sh"
   },
   "dependencies": {

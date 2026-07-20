@@ -4,6 +4,7 @@ import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 import eslintConfigPrettier from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
 
 export default [
   // 1. Игнорируемые папки
@@ -66,7 +67,24 @@ export default [
         ...globals.node,
       },
     },
+    rules: {
+      // Запрещаем console.log, но разрешаем системные info, warn и error
+      'no-console': ['error', { allow: ['info', 'warn', 'error'] }],
+    },
+  },
+  // 6. Интеграция Prettier для всего проекта (Бэк и Фронт)
+  {
+    // Запускаем на всех расширениях, которые должен форматировать Prettier
+    files: ['**/*.{js,ts,tsx,jsx}'],
+    plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      // Превращаем ошибки форматирования Prettier в ошибки ESLint
+      'prettier/prettier': 'error',
+    },
   },
 
+  // 7. Отключаем конфликтующие правила
   eslintConfigPrettier,
 ];

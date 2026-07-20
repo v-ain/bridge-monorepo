@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "webpack serve --mode development",
     "build": "cross-env NODE_ENV=production webpack",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

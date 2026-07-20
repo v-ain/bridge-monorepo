@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Monorepo with shared types, JS server, and React client",
   "private": true,
+  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -17,10 +18,11 @@
     "dev": "npm run build:shared && concurrently \"npm run dev:shared\" \"npm run dev:server\" \"npm run dev:client\"",
     "build": "npm run build:shared && npm run build:client",
     "check-types": "npm run check-types --workspaces --if-present",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
     "format": "prettier --check .",
-    "format:fix": "prettier --write ."
+    "format:fix": "prettier --write .",
+    "prepare": "husky"
   },
   "keywords": [
     "monorepo",
@@ -36,9 +38,11 @@
     "concurrently": "^9.2.1",
     "eslint": "^9.20.0",
     "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.7.0",
+    "husky": "^9.1.7",
     "prettier": "^3.9.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.61.1"
