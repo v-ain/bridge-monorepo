@@ -12,7 +12,8 @@
     "start:prod": "node server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "bash test.sh"
+    "test:e2e": "bash test.sh",
+    "test": "vitest run"
   },
   "dependencies": {
     "@bridge-monorepo/shared": "*"

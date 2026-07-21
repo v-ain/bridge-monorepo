@@ -7,7 +7,7 @@ YELLOW='\033[0;33m'
 NC='\033[0m'
 
 BASE_URL="http://192.168.0.101:3000"
-NOTES_URL="$BASE_URL/api/notes"
+NOTES_URL="$BASE_URL/api/v2/notes"
 
 echo "=== Server API Tests ==="
 echo ""
