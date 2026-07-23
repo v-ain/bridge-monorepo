@@ -1,0 +1,21 @@
+{
+  "name": "@bridge-monorepo/server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Server with JSDoc type checking",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "check-types": "tsc --project tsconfig.json --noEmit",
+    "start:prod": "node server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:e2e": "bash test.sh",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bridge-monorepo/shared": "*"
+  }
+}

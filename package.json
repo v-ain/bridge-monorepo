@@ -3,25 +3,28 @@
   "version": "1.0.0",
   "description": "Monorepo with shared types, JS server, and React client",
   "private": true,
+  "type": "module",
   "workspaces": [
-    "shared",
-    "server",
-    "client"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "build:shared": "npm run build --workspace=@bridge-monorepo/shared",
-    "check-types": "npm run check-types --workspaces --if-present",
     "dev:shared": "npm run dev --workspace=@bridge-monorepo/shared",
     "dev:server": "npm run dev --workspace=@bridge-monorepo/server",
     "dev:client": "npm run dev --workspace=@bridge-monorepo/client",
+    "build:client": "npm run build --workspace=@bridge-monorepo/client",
+    "build:server": "npm run build --workspace=@bridge-monorepo/server",
     "dev": "npm run build:shared && concurrently \"npm run dev:shared\" \"npm run dev:server\" \"npm run dev:client\"",
-    "start:server": "npm run start --workspace server",
-    "build:client": "npm run build --workspace client",
-    "build": "tsc -b shared && npm run build --workspace client",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "build": "npm run build:shared && npm run build:client",
+    "check-types": "npm run check-types --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
     "format": "prettier --check .",
-    "format:fix": "prettier --write ."
+    "format:fix": "prettier --write .",
+    "prepare": "husky",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "npm run test:e2e --workspace=@bridge-monorepo/server"
   },
   "keywords": [
     "monorepo",
@@ -32,16 +35,19 @@
   "author": "v-ain",
   "license": "MIT",
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@types/node": "^25.5.0",
+    "@eslint/js": "^9.20.0",
+    "@types/node": "^22.10.0",
     "concurrently": "^9.2.1",
-    "eslint": "^10.5.0",
-    "eslint-config-prettier": "^10.1.8",
+    "eslint": "^9.20.0",
+    "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.7.0",
+    "husky": "^9.1.7",
     "prettier": "^3.9.4",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.61.1"
+    "typescript-eslint": "^8.61.1",
+    "vitest": "^4.1.10"
   }
 }

@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "[CI/CD] Running local pipeline before push..."
+
+# Последовательно запускаем линтер, проверку типов и тесты Vitest по всей монорепе
+npm run lint && npm run check-types && npm run test

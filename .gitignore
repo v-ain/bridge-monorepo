@@ -6,6 +6,7 @@ node_modules/
 dist/
 build/
 coverage/
-server/data/*.json
+apps/server/data/*
+!apps/server/data/.gitkeep
 *.log
 /notes/

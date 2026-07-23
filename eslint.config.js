@@ -4,6 +4,7 @@ import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 import eslintConfigPrettier from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
 
 export default [
   // 1. Игнорируемые папки
@@ -33,7 +34,7 @@ export default [
 
   // 4. Специфика фронтенда (Применяется только к папке client)
   {
-    files: ['client/**/*.{ts,tsx}'],
+    files: ['apps/client/**/*.{ts,tsx}'],
     plugins: {
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
@@ -59,14 +60,31 @@ export default [
 
   // 5. Специфика бэкенда (Применяется только к папке server)
   {
-    files: ['server/**/*.{ts,js}'],
+    files: ['apps/server/**/*.{ts,js}'],
     languageOptions: {
       // Добавляем глобальные переменные Node.js (process, require, __dirname)
       globals: {
         ...globals.node,
       },
     },
+    rules: {
+      // Запрещаем console.log, но разрешаем системные info, warn и error
+      'no-console': ['error', { allow: ['info', 'warn', 'error'] }],
+    },
+  },
+  // 6. Интеграция Prettier для всего проекта (Бэк и Фронт)
+  {
+    // Запускаем на всех расширениях, которые должен форматировать Prettier
+    files: ['**/*.{js,ts,tsx,jsx}'],
+    plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      // Превращаем ошибки форматирования Prettier в ошибки ESLint
+      'prettier/prettier': 'error',
+    },
   },
 
+  // 7. Отключаем конфликтующие правила
   eslintConfigPrettier,
 ];
